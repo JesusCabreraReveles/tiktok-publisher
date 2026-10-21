@@ -12,6 +12,9 @@ Usage:
   python3 publish_daily.py                 # today's script
   python3 publish_daily.py --date 2026-10-21
   python3 publish_daily.py --dry-run       # everything except git push and Make
+  python3 publish_daily.py --force         # regenerate the video even if it exists
+
+Safe to re-run: an existing video is reused and an already-committed video is not committed again.
 
 Needs in config.json:
   "make_webhook_url": "https://hook.us1.make.com/...",
@@ -71,6 +74,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", default=dt.date.today().isoformat())
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--force", action="store_true", help="regenerate the video even if it exists")
     args = ap.parse_args()
 
     with open(CONFIG, encoding="utf-8") as f:
@@ -91,7 +95,10 @@ def main():
     rel_video = f"docs/videos/{args.date}.mp4"
     video = os.path.join(HERE, rel_video)
     os.makedirs(os.path.dirname(video), exist_ok=True)
-    run([PY, "make_video.py", script, "-o", video])
+    if os.path.exists(video) and not args.force:
+        log(f"Video already exists, reusing it (use --force to regenerate): {rel_video}")
+    else:
+        run([PY, "make_video.py", script, "-o", video])
 
     if args.dry_run:
         log(f"Dry run done. Video: {video}")
@@ -99,7 +106,11 @@ def main():
         return
 
     run(["git", "add", rel_video])
-    run(["git", "commit", "--quiet", "-m", f"Video {args.date}"])
+    staged = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=HERE).returncode != 0
+    if staged:
+        run(["git", "commit", "--quiet", "-m", f"Video {args.date}"])
+    else:
+        log("Nothing new to commit (video already committed).")
     run(["git", "push", "--quiet"])
 
     url = base + f"videos/{args.date}.mp4"
