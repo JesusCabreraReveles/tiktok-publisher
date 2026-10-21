@@ -1,0 +1,14 @@
+{
+  "lang": "en",
+  "tag": "AI · TUESDAY",
+  "brand": "geminislabs.com",
+  "caption": "Before you add AI to your product, answer these 3 questions. Most teams skip all of them.",
+  "hashtags": ["#ai", "#productmanagement", "#softwareengineering", "#techtok", "#leadership"],
+  "slides": [
+    {"screen": "Stop adding AI to everything", "say": "Before you add AI to your product, ask three questions. Most teams skip all of them."},
+    {"screen": "1. What decision does it improve?", "say": "First: what task does it actually make better? If you can't name one, it's a demo, not a feature."},
+    {"screen": "2. What happens when it's wrong?", "say": "Second: what happens when it's wrong? Every model makes mistakes. Design the fallback before you ship."},
+    {"screen": "3. How will you know it works?", "say": "Third: how will you measure it? Pick one number before launch, not after."},
+    {"screen": "No answers? Not ready yet.", "say": "If you can't answer all three, you're not ready yet. And that's fine. Follow for more."}
+  ]
+}
