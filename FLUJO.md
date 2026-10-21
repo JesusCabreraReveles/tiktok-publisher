@@ -1,7 +1,7 @@
 # Flujo de publicación en TikTok
 
-Estado: funcionando de punta a punta en modo semi-automático (20 oct 2026). Primer video
-publicado así: "You don't need microservices (yet)". Falta el cron y la tarea de Claude.
+Estado: automatizado desde el 21 oct 2026 (primer video el 20 oct: "You don't need microservices (yet)").
+Jesús solo revisa cada borrador en SocialBee y lo publica con unos clics.
 
 Para instalar y usar los scripts, ver [LEEME.md](LEEME.md).
 
@@ -16,7 +16,7 @@ flowchart LR
     A["Claude<br/>(tarea programada)"] -->|"guiones/AAAA-MM-DD.json"| B["GitHub<br/>tiktok-publisher"]
     B -->|git pull| C["Raspberry Pi 5<br/>publish_daily.py"]
     C -->|"genera video<br/>(Kokoro + ffmpeg)"| C
-    C -->|"git push<br/>docs/videos/AAAA-MM-DD.mp4"| B
+    C -->|"git push<br/>docs/videos/*.mp4"| B
     B -->|GitHub Pages| D["URL pública<br/>del video"]
     C -->|"webhook: caption + video_url"| E["Make<br/>(plan gratis)"]
     E -->|"Create a Post<br/>(perfil LinkedIn)"| F["SocialBee<br/>borrador en TikTok IA"]
@@ -27,8 +27,8 @@ flowchart LR
 
 | # | Quién | Cuándo | Qué hace |
 |---|-------|--------|----------|
-| 1 | Claude (tarea programada) | Lunes a viernes, mañana | Investiga el tema del día, escribe el guion (slides, `caption`, `hashtags`) y lo guarda en `guiones/AAAA-MM-DD.json`. |
-| 2 | Raspberry (cron) | Después de Claude | `publish_daily.py`: `git pull`, genera `docs/videos/AAAA-MM-DD.mp4`, lo sube a GitHub, espera a que Pages lo publique y avisa a Make. |
+| 1 | Claude (tarea programada "TikTok guion diario") | Lunes a viernes, 8:40 | Investiga el tema del día, escribe el guion (slides, `caption`, `hashtags`) y lo guarda en `guiones/AAAA-MM-DD.json`. Los miércoles también `guiones/AAAA-MM-DD-book.json`. Manda notificación. |
+| 2 | Raspberry (cron) | 9:15 (reintento 10:15) | `publish_daily.py`: `git pull`, genera un video por guion del día (`docs/videos/<guion>-<hash>.mp4`), los sube a GitHub, espera a que Pages los publique y avisa a Make. |
 | 3 | Make | Al instante | Escenario "Integration Webhooks": webhook → SocialBee *Create a Post*. |
 | 4 | SocialBee | Al instante | El post llega como **borrador**, con video y descripción, a la categoría "TikTok IA" — pero asignado al perfil de **LinkedIn** (ver "Truco del perfil"). |
 | 5 | Jesús | Cuando quiera | Abre el borrador, cambia el perfil a TikTok, elige **Public** y le da **Share now**. |
@@ -54,6 +54,22 @@ Cuidado: el borrador llega con LinkedIn. Si se aprueba sin cambiar el perfil, se
 
 Temas por día (los mismos que LinkedIn): lunes CEO/liderazgo, martes IA, miércoles ingeniería
 de software/arquitectura, jueves founders/startups, viernes tendencias tech.
+
+### Libro de los miércoles
+
+Los miércoles hay un post extra (LinkedIn y TikTok) que promociona un libro. Las dos tareas usan la
+misma rotación fija, sin repetir: `índice = número de semana ISO mod 6`.
+
+| # | Libro (título de trabajo) | Amazon |
+|---|------|--------|
+| 0 | ADR Kit for Distributed Architectures | `/dp/B0HGNKZKYH` (pasta), `/dp/B0HGMSQ4Y5` (ebook) |
+| 1 | Safe Rule Changes in Telemetry Systems | `/dp/B0HFGY7PVX` |
+| 2 | Designing an IoT Pipeline from Scratch | `/dp/B0HGCDRBLM` |
+| 3 | Incident Diagnostic Playbooks | `/dp/B0HGVQWRYW` |
+| 4 | Event-Driven Architecture for Real-Time Telemetry | `/dp/B0HFTBY42R` |
+| 5 | Diagnosing and Preventing Fatigue in Telemetry Systems | `/dp/B0HFC397XX` |
+
+En TikTok la descripción no puede llevar enlaces que se abran, así que dice "búscalo en Amazon".
 
 ## Componentes y cuentas
 
@@ -94,24 +110,27 @@ de software/arquitectura, jueves founders/startups, viernes tendencias tech.
 4. Si un paso falla, Make **apaga el escenario** y manda un correo: corregir, borrar la cola
    (Webhooks → tiktok-publisher → Queue) y reactivar.
 
-### Cron de la Raspberry (pendiente de activar)
+### Cron de la Raspberry
 
 La Raspberry debe estar en hora de Ciudad de México (`sudo timedatectl set-timezone America/Mexico_City`).
 Con `crontab -e`:
 
 ```cron
-15 9 * * 1-5  cd /home/chch/tiktok-publisher && mkdir -p logs && .venv/bin/python publish_daily.py >> logs/daily.log 2>&1
+15 9,10 * * 1-5  cd /home/chch/tiktok-publisher && mkdir -p logs && .venv/bin/python publish_daily.py >> logs/daily.log 2>&1
 ```
+
+Corre a las 9:15 y a las 10:15. La segunda corrida es un reintento: lo que ya se mandó a Make
+se salta (marcas en `logs/sent/`), así que no duplica borradores.
 
 ## Operación diaria
 
 - **Revisar:** en SocialBee, categoría TikTok IA, abrir el borrador del día y seguir el "Truco del perfil".
 - **Si no llegó el borrador:** revisar `logs/daily.log` en la Raspberry.
-- **Volver a correr un día:** `python3 publish_daily.py --date AAAA-MM-DD`.
+- **Volver a correr un día:** `python3 publish_daily.py --date AAAA-MM-DD` (agrega `--resend` para mandar otra vez a Make).
 - **Probar sin publicar:** `python3 publish_daily.py --dry-run`.
-- **Plan B:** si falla Make o SocialBee, el video está en
-  `https://jesuscabrerareveles.github.io/tiktok-publisher/videos/AAAA-MM-DD.mp4` y la descripción
-  en el guion del día. Se descarga y se sube a mano desde la app de TikTok.
+- **Plan B:** si falla Make o SocialBee, el video está en `docs/videos/` del repositorio
+  (en Pages: `https://jesuscabrerareveles.github.io/tiktok-publisher/videos/<nombre>.mp4`; el nombre
+  sale en `logs/daily.log`) y la descripción en el guion del día. Se descarga y se sube a mano.
 
 ## Problemas comunes
 
@@ -152,14 +171,12 @@ Con `crontab -e`:
 
 1. Respuesta del soporte de SocialBee sobre la privacidad de TikTok. Si la arreglan, cambiar el
    módulo de Make al perfil de TikTok y quitar el truco del perfil.
-2. Activar el cron en la Raspberry.
-3. Agregar a la tarea programada de Claude la escritura del guion diario en `guiones/`.
-4. Revisar la zona horaria de los perfiles en SocialBee: muestran GMT-05:00 y Ciudad de México
+2. Revisar la zona horaria de los perfiles en SocialBee: muestran GMT-05:00 y Ciudad de México
    es GMT-06:00 todo el año.
-5. Licencia de SocialBee marcada "cancelling": revisar con soporte. Si se cancela, el flujo se cae
+3. Licencia de SocialBee marcada "cancelling": revisar con soporte. Si se cancela, el flujo se cae
    (usar el plan B).
-6. Opcional: borrar videos viejos de `docs/videos/` para que el repositorio no crezca de más
+4. Opcional: borrar videos viejos de `docs/videos/` para que el repositorio no crezca de más
    (~1 MB por video).
-7. Post de libro los miércoles (LinkedIn y TikTok), además del post normal: rotación sin repetir
-   entre los libros del proyecto "Publicaciones", con enlaces de Amazon limpios (`/dp/CODIGO`).
-8. Opcional: regenerar la URL del webhook de Make (se mostró en una captura).
+5. Confirmar los títulos exactos de los libros (las tareas los buscan en internet; si no los
+   encuentran usan los títulos de trabajo de la tabla).
+6. Opcional: regenerar la URL del webhook de Make (se mostró en una captura).
