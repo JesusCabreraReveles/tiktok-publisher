@@ -19,6 +19,8 @@ Safe to re-run: an existing video is reused and an already-committed video is no
 Needs in config.json:
   "make_webhook_url": "https://hook.us1.make.com/...",
   "pages_base_url":   "https://jesuscabrerareveles.github.io/tiktok-publisher/"
+Optional:
+  "tiktok_privacy":   "PUBLIC_TO_EVERYONE"   (sent to Make as "privacy")
 """
 import argparse
 import datetime as dt
@@ -123,6 +125,8 @@ def main():
         "caption": build_caption(sc),
         "video_url": url,
         "lang": sc.get("lang", "en"),
+        # SocialBee requires a TikTok privacy mode; Make maps this into "Privacy Status".
+        "privacy": cfg.get("tiktok_privacy", "PUBLIC_TO_EVERYONE"),
     }
     req = urllib.request.Request(
         hook, data=json.dumps(payload).encode(), method="POST",
