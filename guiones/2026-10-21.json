@@ -1,0 +1,14 @@
+{
+  "lang": "en",
+  "tag": "ARCHITECTURE · WEDNESDAY",
+  "brand": "geminislabs.com",
+  "caption": "Most teams adopt microservices too early. Three signs you actually need them, and what to do if you don't.",
+  "hashtags": ["#softwarearchitecture", "#microservices", "#softwareengineering", "#techtok", "#programming"],
+  "slides": [
+    {"screen": "You don't need microservices (yet)", "say": "Most teams adopt microservices too early. Here are three signs you actually need them."},
+    {"screen": "1. Teams block each other", "say": "First: teams keep waiting on each other to deploy. One codebase has become a traffic jam."},
+    {"screen": "2. Parts scale differently", "say": "Second: one part of the system needs far more resources than the rest."},
+    {"screen": "3. Failures spread everywhere", "say": "Third: a bug in one feature keeps taking down everything else."},
+    {"screen": "No signs? Keep the monolith.", "say": "If none of this sounds familiar, a well-structured monolith will take you further. Follow for more."}
+  ]
+}
