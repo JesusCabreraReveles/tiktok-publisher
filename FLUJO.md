@@ -28,6 +28,7 @@ flowchart LR
 | # | Quién | Cuándo | Qué hace |
 |---|-------|--------|----------|
 | 1 | Claude (tarea programada "TikTok guion diario") | Lunes a viernes, 8:40 | Investiga el tema del día, escribe el guion (slides, `caption`, `hashtags`) y lo guarda en `guiones/AAAA-MM-DD.json`. Los miércoles también `guiones/AAAA-MM-DD-book.json`. Manda notificación. |
+| 1b | Claude (tarea programada "Promo mensual LinkedIn + TikTok") | Primer viernes, sábado y domingo de cada mes, 8:27 | Guarda `guiones/AAAA-MM-DD-promo.json` y el post de LinkedIn de la promo (ver "Promos mensuales"). |
 | 2 | Raspberry (cron) | 9:15 (reintento 10:15) | `publish_daily.py`: `git pull`, genera un video por guion del día (`docs/videos/<guion>-<hash>.mp4`), los sube a GitHub, espera a que Pages los publique y avisa a Make. |
 | 3 | Make | Al instante | Escenario "Integration Webhooks": webhook → SocialBee *Create a Post*. |
 | 4 | SocialBee | Al instante | El post llega como **borrador**, con video y descripción, a la categoría "TikTok IA" — pero asignado al perfil de **LinkedIn** (ver "Truco del perfil"). |
@@ -70,6 +71,20 @@ misma rotación fija, sin repetir: `índice = número de semana ISO mod 6`.
 | 5 | Diagnosing and Preventing Fatigue in Telemetry Systems | `/dp/B0HFC397XX` |
 
 En TikTok la descripción no puede llevar enlaces que se abran, así que dice "búscalo en Amazon".
+
+### Promos mensuales (v2, desde el 23 oct 2026)
+
+El primer fin de semana de cada mes (el viernes que cae del 1 al 7, más el sábado y domingo
+siguientes) hay un post extra en LinkedIn y TikTok de un producto propio. Excepción única: 23, 24 y 25 de oct 2026.
+
+| Día | Producto | `brand` |
+|-----|----------|---------|
+| Viernes | Geminis Labs (geminislabs.com) | geminislabs.com |
+| Sábado | Nexus (geminislabs.com/products/nexus) | geminislabs.com |
+| Domingo | Clash of Egos (clashofegos.lol) | clashofegos.lol |
+
+El ángulo rota cada mes (4 ángulos por producto) para no repetir. La tarea corre cada viernes,
+sábado y domingo, pero fuera del fin de semana de promo termina sin hacer nada.
 
 ## Componentes y cuentas
 
@@ -116,10 +131,10 @@ La Raspberry debe estar en hora de Ciudad de México (`sudo timedatectl set-time
 Con `crontab -e`:
 
 ```cron
-15 9,10 * * 1-5  cd /home/chch/tiktok-publisher && mkdir -p logs && .venv/bin/python publish_daily.py >> logs/daily.log 2>&1
+15 9,10 * * *  cd /home/chch/tiktok-publisher && mkdir -p logs && .venv/bin/python publish_daily.py >> logs/daily.log 2>&1
 ```
 
-Corre a las 9:15 y a las 10:15. La segunda corrida es un reintento: lo que ya se mandó a Make
+Corre todos los días a las 9:15 y a las 10:15 (también sábado y domingo, por las promos mensuales; los días sin guion solo registra "No scripts" y termina). La segunda corrida es un reintento: lo que ya se mandó a Make
 se salta (marcas en `logs/sent/`), así que no duplica borradores.
 
 ## Operación diaria
