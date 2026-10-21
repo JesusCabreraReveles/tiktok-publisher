@@ -7,6 +7,7 @@ tokens.json
 voices/
 .venv/
 __pycache__/
+logs/
 
 # Daily videos are published through GitHub Pages
 !docs/videos/
