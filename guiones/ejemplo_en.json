@@ -1,0 +1,14 @@
+{
+  "lang": "en",
+  "tag": "AI · TUESDAY",
+  "brand": "geminislabs.com",
+  "caption": "Will AI replace engineers? Wrong question. The real question is what you'll do with the hours it gives back.",
+  "hashtags": ["#ai", "#softwareengineering", "#leadership", "#techtok", "#futureofwork"],
+  "slides": [
+    {"screen": "Will AI replace engineers?", "say": "Everyone keeps asking if AI will replace engineers. That's the wrong question."},
+    {"screen": "Code was never the bottleneck", "say": "AI is great at writing code. But writing code was never the hard part."},
+    {"screen": "Judgment is", "say": "The hard part is deciding what to build, and what to leave out."},
+    {"screen": "Ship experiments, not guesses", "say": "The best teams use AI to test ideas faster, then spend the time they saved on thinking."},
+    {"screen": "What will you do with the time?", "say": "So don't ask if AI will replace you. Ask what you'll do with the hours it gives back. Follow for more."}
+  ]
+}

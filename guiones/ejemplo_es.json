@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "IA · MARTES",
+  "brand": "geminislabs.com",
+  "caption": "¿La IA va a reemplazar a los ingenieros? Es la pregunta equivocada. La pregunta real es qué vas a hacer con el tiempo que te regresa.",
+  "hashtags": ["#ia", "#inteligenciaartificial", "#programacion", "#liderazgo", "#tecnologia"],
+  "slides": [
+    {"screen": "¿La IA va a reemplazar a los ingenieros?", "say": "Todos preguntan si la IA va a reemplazar a los ingenieros. Es la pregunta equivocada."},
+    {"screen": "El código nunca fue el problema", "say": "La IA escribe código muy bien. Pero escribir código nunca fue la parte difícil."},
+    {"screen": "El criterio sí", "say": "Lo difícil es decidir qué construir, y qué dejar fuera."},
+    {"screen": "Experimenta, no adivines", "say": "Los mejores equipos usan la IA para probar ideas más rápido, y dedican el tiempo ahorrado a pensar."},
+    {"screen": "¿Qué harás con ese tiempo?", "say": "Así que no preguntes si la IA te va a reemplazar. Pregunta qué vas a hacer con las horas que te regresa. Sígueme para más."}
+  ]
+}
