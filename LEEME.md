@@ -1,12 +1,12 @@
 # tiktok-publisher
 
 Convierte un guion corto (JSON) en un video vertical 1080×1920 con voz, titular grande y subtítulos,
-y lo publica en TikTok con la API oficial. Todo corre en una Raspberry Pi 5: sin GPU, sin servicios de pago.
+y lo publica en TikTok. Todo el video se genera en una Raspberry Pi 5: sin GPU, sin servicios de pago.
 
 - **Voz:** Kokoro (modelo abierto, corre en CPU). Voces en inglés y español.
 - **Imagen:** Pillow (Python).
 - **Video:** ffmpeg.
-- **Publicación:** TikTok Content Posting API.
+- **Publicación:** SocialBee (vía Make). La API directa de TikTok solo sirve para pruebas.
 
 Páginas de la app (GitHub Pages, carpeta `docs/`):
 - https://jesuscabrerareveles.github.io/tiktok-publisher/terms.html
@@ -32,6 +32,7 @@ cd ..
 ```
 
 El modelo pesa unos 120 MB en total y cabe de sobra en 4 GB de RAM.
+En la Raspberry Pi 5, un video de ~28 s tarda unos 47 s en generarse.
 
 ## Generar un video
 
@@ -40,9 +41,6 @@ source .venv/bin/activate
 python3 make_video.py guiones/ejemplo_en.json -o tiktok_en.mp4
 python3 make_video.py guiones/ejemplo_es.json -o tiktok_es.mp4
 ```
-
-En el servidor de pruebas (2 núcleos) cada video de ~28 s tardó unos 40 s. En la Raspberry
-probablemente tarde de 1 a 4 minutos; hay que medirlo la primera vez.
 
 ## Formato del guion
 
@@ -69,55 +67,36 @@ probablemente tarde de 1 a 4 minutos; hay que medirlo la primera vez.
 
 El diseño deja libre la franja derecha y la parte de abajo, que TikTok tapa con sus botones y la descripción.
 
-## Publicar en TikTok (tiktok_upload.py)
+## Flujo diario (publish_daily.py)
 
-Solo necesita Python, sin paquetes extra.
+TikTok no aprueba apps de uso personal, así que la publicación va por SocialBee, que ya
+tiene su app aprobada.
 
-**Dos modos:**
-- **Directo (predeterminado):** publica con la descripción y los hashtags del guion.
-  Primero intenta en **público**. Si TikTok lo rechaza (app sin auditar), lo publica en
-  **privado** automáticamente y te lo dice.
-- `--inbox`: el video llega a tu app de TikTok como notificación y tú pones la descripción.
+1. **Claude** deja el guion del día en `guiones/AAAA-MM-DD.json`.
+2. **La Raspberry** (cron) ejecuta `publish_daily.py`:
+   - `git pull`, genera `docs/videos/AAAA-MM-DD.mp4` y lo sube a GitHub;
+   - espera a que GitHub Pages publique el video;
+   - manda a Make la descripción con hashtags y la URL del video.
+3. **Make** crea el post de TikTok en SocialBee como borrador.
+4. **Tú** lo apruebas en SocialBee.
 
-El video se marca como contenido hecho con IA (`is_aigc`), como pide TikTok.
-Límite de TikTok: máximo 5 subidas pendientes en 24 horas.
-
-### 1. Crear la app en TikTok (una sola vez)
-
-1. En https://developers.tiktok.com crea una organización y una app.
-2. Datos básicos: ícono (`docs/icon.png`), nombre, categoría, descripción, y las URLs de
-   Términos y Privacidad de arriba.
-3. Productos:
-   - **Login Kit**, con Redirect URI `https://jesuscabrerareveles.github.io/tiktok-publisher/`
-   - **Content Posting API**, con **Direct Post** activado.
-4. Scopes: `user.info.basic`, `video.publish` y `video.upload` (este último solo para `--inbox`).
-5. Para probar sin esperar revisión, usa la pestaña **Sandbox** y agrega tu cuenta de TikTok
-   como usuario de prueba.
-
-### 2. Configurar en la Raspberry
+En `config.json` agrega `make_webhook_url` y `pages_base_url` (ver `config.example.json`).
 
 ```bash
-cp config.example.json config.json
-nano config.json          # pega client_key y client_secret de tu app
-chmod 600 config.json
-python3 tiktok_upload.py auth
+python3 publish_daily.py --dry-run            # prueba sin subir nada
+python3 publish_daily.py                      # guion de hoy
+python3 publish_daily.py --date 2026-10-21    # otro día
 ```
 
-`auth` te da un enlace. Ábrelo, acepta, y TikTok te manda a la página del proyecto con
-`?code=...` en la barra de direcciones. Copia esa dirección completa y pégala en la terminal.
-Se guarda `tokens.json` y el script lo renueva solo.
+La Raspberry sube a GitHub con una deploy key (`~/.ssh/tiktok_deploy`) que solo tiene acceso
+a este repositorio.
 
-`config.json` y `tokens.json` están en `.gitignore`: nunca se suben a GitHub.
+## Pruebas con la API directa de TikTok (tiktok_upload.py)
 
-### 3. Uso diario
+TikTok solo deja publicar a apps sin auditar en **cuentas privadas**, y no aprueba apps de uso
+personal. Este script queda para pruebas.
 
-```bash
-python3 make_video.py guiones/hoy.json -o hoy.mp4
-python3 tiktok_upload.py upload hoy.mp4 --script guiones/hoy.json                    # directo
-python3 tiktok_upload.py upload hoy.mp4 --script guiones/hoy.json --privacy private  # privado
-python3 tiktok_upload.py upload hoy.mp4 --inbox                                      # a tu bandeja
-```
-
-## Pendiente
-
-1. Que Claude deje el guion del día en `guiones/` y la Raspberry lo tome con cron.
+- Configuración: `client_key` y `client_secret` del Sandbox en `config.json`, luego
+  `python3 tiktok_upload.py auth` (abre el enlace, acepta y pega la dirección con `?code=...`).
+- Uso: `python3 tiktok_upload.py upload video.mp4 --script guion.json` (directo) o `--inbox`.
+- `config.json` y `tokens.json` están en `.gitignore`: nunca se suben a GitHub.
