@@ -1,0 +1,14 @@
+{
+  "lang": "en",
+  "tag": "ARCHITECTURE · WEDNESDAY",
+  "brand": "geminislabs.com",
+  "caption": "Microservices won't fix a tangled codebase. Three myths I see teams fall for before they split the monolith.",
+  "hashtags": ["#tech", "#softwarearchitecture", "#microservices", "#techtok"],
+  "slides": [
+    {"screen": "Microservices won't save your codebase", "say": "If your monolith is a mess, splitting it into services usually gives you a distributed mess."},
+    {"screen": "Myth 1: Services mean independence", "say": "Reality: if services share a database or deploy together, they are still one system. Just slower to change."},
+    {"screen": "Myth 2: Services make you faster", "say": "Reality: every network call adds latency, retries and failure modes. Small teams often move slower, not faster."},
+    {"screen": "Myth 3: You must split to scale", "say": "Reality: a modular monolith with clear boundaries scales far further than most products ever need."},
+    {"screen": "Fix the boundaries first", "say": "Draw clean modules inside one codebase. Split only when a team or workload truly needs it. Follow for more."}
+  ]
+}

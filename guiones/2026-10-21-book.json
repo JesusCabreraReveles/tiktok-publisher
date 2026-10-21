@@ -1,0 +1,13 @@
+{
+  "lang": "en",
+  "tag": "BOOK · WEDNESDAY",
+  "brand": "geminislabs.com",
+  "caption": "My book Safe Rule Changes in Telemetry Systems is on Amazon. Search \"Safe Rule Changes in Telemetry Systems Jesús Cabrera\".",
+  "hashtags": ["#tech", "#observability", "#booktok", "#techtok"],
+  "slides": [
+    {"screen": "One rule change. Production breaks.", "say": "You tweak a single telemetry rule, and suddenly alerts go silent or start firing everywhere. Sound familiar?"},
+    {"screen": "Rules are code. Treat them that way.", "say": "Rules in telemetry systems decide what gets flagged. Changing them deserves the same care as shipping code."},
+    {"screen": "Change rules without the fear", "say": "I wrote a book on making rule changes in telemetry systems safely, for engineers who run these systems every day."},
+    {"screen": "On Amazon: Safe Rule Changes", "say": "It's on Amazon: Safe Rule Changes in Telemetry Systems. Follow for more."}
+  ]
+}
