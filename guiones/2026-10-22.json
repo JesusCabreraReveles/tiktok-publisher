@@ -1,0 +1,14 @@
+{
+  "lang": "en",
+  "tag": "FOUNDERS · THURSDAY",
+  "brand": "geminislabs.com",
+  "caption": "Not every term sheet is a win. Three checks before you let an investor onto your cap table.",
+  "hashtags": ["#tech", "#startups", "#founders", "#techtok"],
+  "slides": [
+    {"screen": "Not all money is good money", "say": "Most founders treat every term sheet as a win. The wrong investor can cost you more than no investor at all."},
+    {"screen": "1. Ask about the bad times", "say": "Talk to founders whose companies struggled, not just the winners. That's where you learn how this investor really behaves."},
+    {"screen": "2. Check their fund clock", "say": "Every fund has to return money by a deadline. If their clock doesn't match your path, expect pressure at the worst moment."},
+    {"screen": "3. Watch how they say no", "say": "Diligence is a preview. If they're slow, vague, or disrespectful now, it gets worse after the wire."},
+    {"screen": "Pick partners, not checks", "say": "Your cap table stays with you for years. Choose people you'd actually call on a bad night. Follow for more."}
+  ]
+}
