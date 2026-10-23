@@ -1,0 +1,14 @@
+{
+  "lang": "en",
+  "tag": "GEMINIS LABS · FRIDAY",
+  "brand": "geminislabs.com",
+  "caption": "Turning raw signals from the physical world into decisions people can act on. Search geminislabs.com",
+  "hashtags": ["#iot", "#ai", "#engineering", "#techtok"],
+  "slides": [
+    {"screen": "Data is useless until someone acts", "say": "Raw data is useless. A GPS ping or a sensor reading means nothing until someone decides what to do with it."},
+    {"screen": "Understand. Protect. Act.", "say": "That's the idea behind Geminis Labs, a tech lab in Mexico City. Understand, protect, act."},
+    {"screen": "From signal to decision", "say": "We take signals from GPS, cell towers, sensors and vehicles, process them in real time, and spot what's unusual."},
+    {"screen": "Humans still make the call", "say": "Then it reaches a person as an alert, a map or a report. The AI supports judgment. It doesn't replace it."},
+    {"screen": "geminislabs.com", "say": "Check it out at geminislabs dot com. Follow for more."}
+  ]
+}
