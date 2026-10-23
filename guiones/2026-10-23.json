@@ -1,0 +1,14 @@
+{
+  "lang": "en",
+  "tag": "TRENDS · FRIDAY",
+  "brand": "geminislabs.com",
+  "caption": "This week AI agents stopped being demos: cheap attacks, oversharing, and a new identity layer.",
+  "hashtags": ["#ai", "#aiagents", "#cybersecurity", "#techtok"],
+  "slides": [
+    {"screen": "AI agents got real this week", "say": "This week AI agents stopped being demos. Three stories show what changes when software acts on your behalf."},
+    {"screen": "1. Attacks got cheap", "say": "A researcher reported one hacker used AI agents to breach over a hundred websites. About fifty dollars per intrusion."},
+    {"screen": "2. Agents overshare", "say": "AP reported Meta's Muse agent told a Marketplace buyer the seller was home. Agents act on context you never meant to share."},
+    {"screen": "3. Identity for agents", "say": "World launched World ID for Agents. It proves a verified human delegated the task. Delegation is becoming infrastructure."},
+    {"screen": "Scope what your agents can do", "say": "If you ship agents, limit their permissions, log every action, and patch faster. Follow for more."}
+  ]
+}
