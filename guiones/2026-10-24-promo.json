@@ -1,0 +1,15 @@
+{
+  "lang": "en",
+  "tag": "NEXUS · SATURDAY",
+  "brand": "geminislabs.com",
+  "caption": "Why circles make bad geofences and hexagons don't. Search geminislabs.com for Nexus.",
+  "hashtags": ["#gps", "#geofencing", "#iot", "#techtok"],
+  "slides": [
+    {"screen": "Your geofence is the wrong shape", "say": "Most geofences are circles. And that's exactly why your tracking app keeps crying wolf."},
+    {"screen": "Real places aren't round", "say": "Draw a circle around a warehouse and you either cut off the loading dock or swallow half the street."},
+    {"screen": "Hexagons tile with no gaps", "say": "Hexagons fit together with no gaps or overlaps, so a zone can follow the real shape of a place."},
+    {"screen": "Same distance, every direction", "say": "Every neighboring cell sits at the same distance from the center, so entering and leaving mean the same thing everywhere."},
+    {"screen": "Exact zones, fewer false alarms", "say": "That's why Nexus uses hexagonal geofences. Exact zones, fewer false alarms, alerts you can actually trust."},
+    {"screen": "Nexus at geminislabs.com", "say": "Check it out at geminislabs dot com. Follow for more."}
+  ]
+}
