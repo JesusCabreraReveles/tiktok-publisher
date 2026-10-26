@@ -86,6 +86,35 @@ siguientes) hay un post extra en LinkedIn y TikTok de un producto propio. Excepc
 El ángulo rota cada mes (4 ángulos por producto) para no repetir. La tarea corre cada viernes,
 sábado y domingo, pero fuera del fin de semana de promo termina sin hacer nada.
 
+### Estilo visual (v1.1, desde el 27 oct 2026)
+
+Para que los videos no se vean todos iguales, `make_video.py` cambia el aspecto solo, sin que
+la tarea de Claude tenga que hacer nada distinto:
+
+- **Paleta por tema**, según el nombre del guion:
+
+  | Guion | Tema | Colores |
+  |-------|------|---------|
+  | Lunes | `leadership` | azul marino + dorado |
+  | Martes | `ai` | morado + turquesa (el estilo original) |
+  | Miércoles | `engineering` | verde oscuro + lima |
+  | Jueves | `founders` | naranja quemado + ámbar |
+  | Viernes (y fines de semana) | `trends` | magenta + azul cielo |
+  | `-book` | `book` | azul petróleo + amarillo |
+  | `-promo` viernes / sábado / domingo | `geminis` / `nexus` / `clash` | índigo + cian / gris carbón + verde / rojo + amarillo |
+
+- **Patrón de fondo** que rota por fecha: cuadrícula, puntos, rayas diagonales, ondas, anillos
+  o red de nodos. Dos días seguidos nunca se repiten, y el mismo día de la semana cambia de
+  una semana a otra. El libro y la promo usan un patrón distinto al del video diario.
+- **Paneo lento** del fondo durante todo el video (ffmpeg `crop` con movimiento), para que no
+  parezca imagen fija. El texto va en una capa transparente encima.
+- Para forzar un tema, agregar `"style": "clash"` (o cualquier nombre de la tabla) al guion.
+- Vista rápida sin voz: `python3 make_video.py guiones/AAAA-MM-DD.json --still prueba.png`.
+- Generar el video tarda más que antes (cada cuadro mezcla fondo y texto). En la Pi 5 se esperan
+  1–3 min por video; sigue de sobra dentro de la ventana de 9:15 a 10:15.
+
+Siguiente paso (v1.2): foto relacionada con el tema detrás del texto (Pexels).
+
 ## Componentes y cuentas
 
 | Componente | Detalle |
@@ -195,3 +224,5 @@ se salta (marcas en `logs/sent/`), así que no duplica borradores.
 5. Confirmar los títulos exactos de los libros (las tareas los buscan en internet; si no los
    encuentran usan los títulos de trabajo de la tabla).
 6. Opcional: regenerar la URL del webhook de Make (se mostró en una captura).
+7. Semana del 2 nov 2026: agregar foto relacionada por diapositiva (Pexels, necesita API key
+   gratis). Si no hay foto o falla la descarga, se usa el fondo de patrón.
