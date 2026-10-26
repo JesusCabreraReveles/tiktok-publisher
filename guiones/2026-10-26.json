@@ -1,0 +1,14 @@
+{
+  "lang": "en",
+  "tag": "LEADERSHIP · MONDAY",
+  "brand": "geminislabs.com",
+  "caption": "Three CEO myths that quietly slow teams down, and what to do instead.",
+  "hashtags": ["#tech", "#leadership", "#ceo", "#techtok"],
+  "slides": [
+    {"screen": "3 CEO myths that hurt teams", "say": "Three CEO myths I see all the time. Each one quietly slows your team down."},
+    {"screen": "Myth 1: The CEO decides everything", "say": "Myth one: the CEO should make every call. Reality: make fewer, bigger decisions and delegate the rest."},
+    {"screen": "Myth 2: Busy means productive", "say": "Myth two: a packed calendar means progress. Reality: protect time to think. Back-to-back meetings mean nobody else can decide."},
+    {"screen": "Myth 3: Bad news can wait", "say": "Myth three: bad news can wait until it's fixed. Reality: tell your team early. Surprises destroy trust faster than problems."},
+    {"screen": "Lead with clarity, not control", "say": "Lead with clarity, not control. Your team will move faster than you expect. Follow for more."}
+  ]
+}
