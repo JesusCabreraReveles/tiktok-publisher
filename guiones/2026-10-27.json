@@ -1,0 +1,14 @@
+{
+  "lang": "en",
+  "tag": "AI · TUESDAY",
+  "brand": "geminislabs.com",
+  "caption": "Three myths about AI agents in business, and what actually works when you put one to work.",
+  "hashtags": ["#ai", "#aiagents", "#automation", "#techtok"],
+  "slides": [
+    {"screen": "3 myths about AI agents", "say": "Everyone is shipping AI agents right now. Here are three myths I keep hearing from business owners."},
+    {"screen": "1. Agents can run unsupervised", "say": "Reality: agents need clear limits. Decide what they can do alone, and what needs a human yes."},
+    {"screen": "2. More agents, more output", "say": "Reality: one agent on one painful workflow beats ten agents on nothing. Start narrow."},
+    {"screen": "3. The model is the hard part", "say": "Reality: the hard part is your data and your process. A messy process, automated, is still messy."},
+    {"screen": "Start with one boring task", "say": "Pick one boring, repeated task. Measure it before and after. Then expand. Follow for more."}
+  ]
+}
