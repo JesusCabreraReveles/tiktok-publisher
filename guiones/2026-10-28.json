@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "ARQUITECTURA · MIÉRCOLES",
+  "brand": "geminislabs.com",
+  "caption": "¿Microservicios desde el día uno? Mito vs realidad, y por qué un monolito modular suele ser mejor punto de partida.",
+  "hashtags": ["#tecnologia", "#programacion", "#arquitecturadesoftware", "#techtok"],
+  "slides": [
+    {"screen": "¿Microservicios desde el día uno?", "say": "Empezar con microservicios parece lo profesional. Para muchos equipos que apenas arrancan, es una de las decisiones más caras."},
+    {"screen": "Mito: siempre escalan mejor", "say": "Mito: los microservicios siempre escalan mejor. Realidad: escalan lo que ya entiendes. Si tu dominio cambia cada semana, multiplicas el caos."},
+    {"screen": "Realidad: la red cobra caro", "say": "Cada llamada entre servicios suma latencia, fallas parciales y más monitoreo. Lo que era una función ahora es un problema distribuido."},
+    {"screen": "La alternativa: monolito modular", "say": "Un solo despliegue, pero con módulos de fronteras claras. Cada módulo cuida sus datos y nadie entra por la puerta de atrás."},
+    {"screen": "Separa cuando duela, no antes", "say": "Cuando un módulo necesite escalar aparte, lo sacas. La frontera ya estará lista. Sígueme para más."}
+  ]
+}

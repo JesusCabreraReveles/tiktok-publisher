@@ -1,0 +1,13 @@
+{
+  "lang": "es",
+  "tag": "LIBRO · MIÉRCOLES",
+  "brand": "geminislabs.com",
+  "caption": "Mi libro Designing an IoT Pipeline from Scratch está en Amazon (en inglés). Búscalo como \"Designing an IoT Pipeline from Scratch Jesús Cabrera\".",
+  "hashtags": ["#booktok", "#libros", "#programacion", "#techtok"],
+  "slides": [
+    {"screen": "Tus sensores mandan datos. ¿Y luego?", "say": "Tienes miles de dispositivos mandando datos y no sabes cómo recibirlos y procesarlos sin que todo se caiga. Te entiendo."},
+    {"screen": "Diseña tu tubería desde cero", "say": "Escribí un libro sobre cómo diseñar una tubería de datos para internet de las cosas, empezando desde cero."},
+    {"screen": "Para quien construye el sistema", "say": "Es para ingenieros y arquitectos que tienen que levantar todo el camino de los datos, desde que llegan hasta que se procesan."},
+    {"screen": "Designing an IoT Pipeline from Scratch", "say": "Está en Amazon, en inglés. Búscalo con mi nombre: Jesús Cabrera. Sígueme para más."}
+  ]
+}
