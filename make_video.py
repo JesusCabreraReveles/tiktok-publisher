@@ -15,11 +15,15 @@ Script format (JSON):
   "tag": "AI · TUESDAY",        # small label at the top
   "brand": "geminislabs.com",   # small text at the bottom
   "style": "ai",                # optional; see THEMES. Normally left out (see below)
+  "cover": "portadas/B0HGCDRBLM.jpg",  # optional (book videos): cover image, relative to the repo
   "slides": [
     {"screen": "Big headline on screen", "say": "What the voice says."},
     ...
   ]
 }
+With "cover", by default slide 1 has no cover (it's the hook), the middle slides show a medium
+cover above a smaller headline, and the last slide shows the cover big, alone. A slide can
+override it with "cover": false, "small" or "big".
 
 Look of each video (v1.1):
   - Color palette by theme. Picked from the file name, so the daily task needs no changes:
@@ -200,8 +204,8 @@ def wrap(draw, text, font, max_w):
     return lines
 
 
-def fit_headline(draw, text, max_w, max_h):
-    for size in range(124, 60, -4):
+def fit_headline(draw, text, max_w, max_h, start=124):
+    for size in range(start, 44, -4):
         f = ImageFont.truetype(FONT_BLACK, size)
         lines = wrap(draw, text, f, max_w)
         lh = int(size * 1.12)
@@ -209,8 +213,8 @@ def fit_headline(draw, text, max_w, max_h):
         # a single long word (e.g. "¿Microservicios") can't wrap: shrink until it fits too
         if len(lines) * lh <= max_h and widest <= max_w:
             return f, lines, lh
-    f = ImageFont.truetype(FONT_BLACK, 60)
-    return f, wrap(draw, text, f, max_w), 68
+    f = ImageFont.truetype(FONT_BLACK, 44)
+    return f, wrap(draw, text, f, max_w), 50
 
 
 def ink_for(color):
@@ -298,7 +302,50 @@ def background(theme, pattern, seed):
     return img
 
 
-def draw_frame(theme, tag, brand, headline, caption, idx, total, progress):
+COVER_TOP = 360                    # covers start under the tag pill
+COVER_BIG_H, COVER_SMALL_H = 740, 430   # big ends at 1100, above the spoken captions (1190)
+
+
+def load_cover(path, height):
+    """Cover scaled to `height` with a soft shadow, as an RGBA image. None if missing."""
+    if not path:
+        return None
+    full = path if os.path.isabs(path) else os.path.join(HERE, path)
+    if not os.path.exists(full):
+        print(f"  warning: cover not found, skipping it: {path}")
+        return None
+    im = Image.open(full).convert("RGB")
+    w = round(im.width * height / im.height)
+    im = im.resize((w, height), Image.LANCZOS)
+    pad = 40
+    out = Image.new("RGBA", (w + 2 * pad, height + 2 * pad), (0, 0, 0, 0))
+    sh = Image.new("L", out.size, 0)
+    ImageDraw.Draw(sh).rectangle((pad, pad + 14, pad + w, pad + height + 14), fill=190)
+    sh = sh.filter(ImageFilter.GaussianBlur(18))
+    out.paste((0, 0, 0, 255), (0, 0), sh)
+    out.paste(im, (pad, pad))
+    ImageDraw.Draw(out).rectangle((pad, pad, pad + w - 1, pad + height - 1),
+                                  outline=(255, 255, 255, 60), width=2)
+    return out
+
+
+def cover_modes(sc):
+    """{slide index: "small" | "big"} for the slides that show the cover."""
+    if not sc.get("cover"):
+        return {}
+    n = len(sc["slides"])
+    modes = {}
+    for i, s in enumerate(sc["slides"]):
+        default = None if i == 0 else ("big" if i == n - 1 else "small")
+        m = s.get("cover", default)
+        if m is True:
+            m = "big"
+        if m in ("small", "big"):
+            modes[i] = m
+    return modes
+
+
+def draw_frame(theme, tag, brand, headline, caption, idx, total, progress, cover=None):
     """Transparent layer with all the text; it goes on top of the moving background."""
     t = THEMES[theme]
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -315,14 +362,31 @@ def draw_frame(theme, tag, brand, headline, caption, idx, total, progress):
     cnt = f"{idx + 1}/{total}"
     d.text((SAFE_RIGHT - d.textlength(cnt, font=fc), SAFE_TOP + 16), cnt, font=fc, fill=MUTED)
 
-    # headline
     max_w = SAFE_RIGHT - SAFE_LEFT
-    fh, lines, lh = fit_headline(d, headline, max_w - 44, 620)  # text starts 44 px in
-    y = 420
-    d.rectangle((SAFE_LEFT, y + 6, SAFE_LEFT + 12, y + lh * len(lines) - 14), fill=t["accent2"])
-    for ln in lines:
-        d.text((SAFE_LEFT + 44, y), ln, font=fh, fill=WHITE)
-        y += lh
+    mode, cimg = cover if cover else (None, None)
+    if mode == "big":
+        # the cover already carries the title, so it replaces the headline
+        x = SAFE_LEFT + (max_w - cimg.width) // 2
+        img.alpha_composite(cimg, (x, COVER_TOP - 40))
+    elif mode == "small":
+        # medium cover on top, smaller headline under it
+        x = SAFE_LEFT + (max_w - cimg.width) // 2
+        img.alpha_composite(cimg, (x, COVER_TOP - 40))
+        top = COVER_TOP + COVER_SMALL_H + 50
+        fh, lines, lh = fit_headline(d, headline, max_w - 44, 1120 - top, start=84)
+        y = top
+        d.rectangle((SAFE_LEFT, y + 6, SAFE_LEFT + 12, y + lh * len(lines) - 14), fill=t["accent2"])
+        for ln in lines:
+            d.text((SAFE_LEFT + 44, y), ln, font=fh, fill=WHITE)
+            y += lh
+    else:
+        # headline
+        fh, lines, lh = fit_headline(d, headline, max_w - 44, 620)  # text starts 44 px in
+        y = 420
+        d.rectangle((SAFE_LEFT, y + 6, SAFE_LEFT + 12, y + lh * len(lines) - 14), fill=t["accent2"])
+        for ln in lines:
+            d.text((SAFE_LEFT + 44, y), ln, font=fh, fill=WHITE)
+            y += lh
 
     # caption (what is being said right now)
     if caption:
@@ -362,7 +426,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("script")
     ap.add_argument("-o", "--out", default="out.mp4")
-    ap.add_argument("--still", help="write one PNG of the first slide (no voice, no video)")
+    ap.add_argument("--still", help="write one PNG of a slide (no voice, no video)")
+    ap.add_argument("--slide", type=int, default=1, help="slide number for --still (1 = first)")
     args = ap.parse_args()
 
     with open(args.script, encoding="utf-8") as f:
@@ -373,14 +438,26 @@ def main():
     tag = sc.get("tag", "")
     brand = sc.get("brand", "")
     theme, pattern, seed = pick_look(args.script, sc)
-    print(f"Look: theme={theme} pattern={pattern}")
+    covers = {"big": load_cover(sc.get("cover"), COVER_BIG_H)}
+    modes = {}
+    if covers["big"] is not None:
+        covers["small"] = load_cover(sc.get("cover"), COVER_SMALL_H)
+        modes = cover_modes(sc)
+    print(f"Look: theme={theme} pattern={pattern}"
+          + (f" cover={ {i + 1: m for i, m in modes.items()} }" if modes else ""))
+
+    def cover_for(i):
+        m = modes.get(i)
+        return (m, covers[m]) if m else None
 
     if args.still:
         bg = background(theme, pattern, seed)
         cx, cy = PAN // 2, PAN // 2
         frame = bg.crop((cx, cy, cx + W, cy + H)).convert("RGBA")
-        cap = caption_chunks(slides[0]["say"], 1)[0][0]
-        frame.alpha_composite(draw_frame(theme, tag, brand, slides[0]["screen"], cap, 0, len(slides), 0.2))
+        i = min(max(args.slide, 1), len(slides)) - 1
+        cap = caption_chunks(slides[i]["say"], 1)[0][0]
+        frame.alpha_composite(draw_frame(theme, tag, brand, slides[i]["screen"], cap, i, len(slides),
+                                         (i + 0.5) / len(slides), cover_for(i)))
         frame.convert("RGB").save(args.still)
         print(f"Done: {args.still}")
         return
@@ -414,7 +491,8 @@ def main():
             chunks = caption_chunks(s["say"], dur) + [("", GAP)]
             for cap, cdur in chunks:
                 t += cdur
-                img = draw_frame(theme, tag, brand, s["screen"], cap, i, len(slides), t / total_dur)
+                img = draw_frame(theme, tag, brand, s["screen"], cap, i, len(slides), t / total_dur,
+                                 cover_for(i))
                 p = os.path.join(work, f"f{n:04d}.png")
                 img.save(p)
                 concat_lines += [f"file '{p}'", f"duration {cdur:.3f}"]
