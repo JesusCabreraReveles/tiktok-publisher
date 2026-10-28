@@ -8,7 +8,8 @@ Para instalar y usar los scripts, ver [LEEME.md](LEEME.md).
 ## Resumen
 
 Cada día hábil se publica en TikTok un video corto (20–45 s) sobre tecnología y liderazgo,
-con voz, titular en pantalla y subtítulos. Todo es gratis: el video se genera en una
+con voz, titular en pantalla y subtítulos. Desde el 28 oct 2026 los videos son **en español**
+(voz Kokoro `em_alex`, `"lang": "es"`); antes eran en inglés. LinkedIn sigue en inglés. Todo es gratis: el video se genera en una
 Raspberry Pi 5 y se publica a través de SocialBee. Jesús revisa y publica cada post (unos clics).
 
 ```mermaid
@@ -112,6 +113,9 @@ la tarea de Claude tenga que hacer nada distinto:
 - Vista rápida sin voz: `python3 make_video.py guiones/AAAA-MM-DD.json --still prueba.png`.
 - Generar el video tarda más que antes (cada cuadro mezcla fondo y texto). En la Pi 5 se esperan
   1–3 min por video; sigue de sobra dentro de la ventana de 9:15 a 10:15.
+
+Los libros están en inglés: en el video la voz los describe en español y avisa que están en inglés;
+el título exacto solo aparece en pantalla y en la descripción.
 
 Siguiente paso (v1.2): foto relacionada con el tema detrás del texto (Pexels).
 
