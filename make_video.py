@@ -205,7 +205,9 @@ def fit_headline(draw, text, max_w, max_h):
         f = ImageFont.truetype(FONT_BLACK, size)
         lines = wrap(draw, text, f, max_w)
         lh = int(size * 1.12)
-        if len(lines) * lh <= max_h:
+        widest = max((draw.textlength(ln, font=f) for ln in lines), default=0)
+        # a single long word (e.g. "¿Microservicios") can't wrap: shrink until it fits too
+        if len(lines) * lh <= max_h and widest <= max_w:
             return f, lines, lh
     f = ImageFont.truetype(FONT_BLACK, 60)
     return f, wrap(draw, text, f, max_w), 68
@@ -315,7 +317,7 @@ def draw_frame(theme, tag, brand, headline, caption, idx, total, progress):
 
     # headline
     max_w = SAFE_RIGHT - SAFE_LEFT
-    fh, lines, lh = fit_headline(d, headline, max_w, 620)
+    fh, lines, lh = fit_headline(d, headline, max_w - 44, 620)  # text starts 44 px in
     y = 420
     d.rectangle((SAFE_LEFT, y + 6, SAFE_LEFT + 12, y + lh * len(lines) - 14), fill=t["accent2"])
     for ln in lines:
