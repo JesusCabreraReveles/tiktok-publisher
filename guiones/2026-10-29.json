@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "FOUNDERS · JUEVES",
+  "brand": "geminislabs.com",
+  "caption": "Levantar capital no es lo mismo que validar tu startup. Mito vs realidad para founders.",
+  "hashtags": ["#tecnologia", "#emprendimiento", "#startups", "#techtok"],
+  "slides": [
+    {"screen": "Levantar dinero no es validación", "say": "Muchos fundadores celebran la ronda de inversión como si fuera la meta. Pero el dinero no prueba que alguien necesite tu producto."},
+    {"screen": "Mito: el inversionista ya validó", "say": "Mito: si un fondo invirtió, la idea funciona. Realidad: el fondo apuesta a muchas empresas esperando que pocas ganen."},
+    {"screen": "Realidad: valida el cliente que paga", "say": "La validación seria es un cliente que paga, regresa y se queja cuando algo falla. Eso no lo da una presentación."},
+    {"screen": "La ronda compra tiempo, nada más", "say": "Una ronda te compra meses para aprender más rápido. Si no mides qué aprendes, solo quemas dinero con más estilo."},
+    {"screen": "Mide uso, no aplausos", "say": "Antes de festejar, revisa si tus usuarios regresan cada semana. Esa cifra vale más que cualquier titular. Sígueme para más."}
+  ]
+}
