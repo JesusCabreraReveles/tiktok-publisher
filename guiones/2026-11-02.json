@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "LIDERAZGO · LUNES",
+  "brand": "geminislabs.com",
+  "caption": "Tres señales de que tu equipo depende demasiado de ti, y qué hacer para soltar el control.",
+  "hashtags": ["#tecnologia", "#liderazgo", "#emprendimiento", "#techtok"],
+  "slides": [
+    {"screen": "¿Tu equipo te necesita para todo?", "say": "Si tu equipo no avanza cuando tú no estás, el problema no es el equipo. Eres tú."},
+    {"screen": "1. Todo pasa por tu aprobación", "say": "Señal uno: nada avanza sin tu visto bueno. Define qué decisiones pueden tomar sin ti, y respétalas."},
+    {"screen": "2. Nadie trae malas noticias", "say": "Señal dos: te enteras tarde de los problemas. Agradece las malas noticias en público, o nadie te las volverá a contar."},
+    {"screen": "3. Tus vacaciones frenan todo", "say": "Señal tres: cuando te vas, el trabajo se detiene. Escribe cómo decides y deja a alguien a cargo de verdad."},
+    {"screen": "Lidera para no ser indispensable", "say": "Tu trabajo es construir un equipo que funcione sin ti. Empieza esta semana soltando una sola decisión. Sígueme para más."}
+  ]
+}
