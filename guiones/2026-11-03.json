@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "IA · MARTES",
+  "brand": "geminislabs.com",
+  "caption": "Desde diciembre ChatGPT y Codex comparten límite de uso. Cuatro formas de administrar la IA como un presupuesto.",
+  "hashtags": ["#ia", "#negocios", "#productividad", "#techtok"],
+  "slides": [
+    {"screen": "Tu IA ya tiene presupuesto", "say": "OpenAI anunció que desde diciembre ChatGPT y Codex compartirán un solo límite de uso. La IA ya se administra como presupuesto."},
+    {"screen": "1. Mide quién consume más", "say": "Revisa qué equipos y qué tareas gastan más. Un agente de código consume mucho más que una pregunta rápida."},
+    {"screen": "2. Separa lo crítico", "say": "Si un agente se come todo el límite, tu equipo se queda sin IA para lo diario. Define prioridades."},
+    {"screen": "3. Usa el modelo justo", "say": "No todo necesita el modelo más potente. Para tareas simples, uno ligero basta y cuesta menos."},
+    {"screen": "4. Compara costo contra resultado", "say": "Pregúntate cuánto tiempo te ahorra cada tarea. Si no lo puedes medir, no lo puedes defender. Sígueme para más."}
+  ]
+}
