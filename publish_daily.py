@@ -78,8 +78,10 @@ def wait_live(url, minutes=15):
             with urllib.request.urlopen(req, timeout=20) as r:
                 if r.status == 200:
                     return True
-        except urllib.error.URLError:
-            pass
+        except (urllib.error.URLError, OSError) as e:
+            # URLError = 404/DNS; OSError covers TimeoutError and dropped connections,
+            # which happen when GitHub Pages is slow. Keep waiting instead of crashing.
+            log(f"  ({type(e).__name__}: {e})")
         log("  video not live yet, waiting 30 s...")
         time.sleep(30)
     return False
@@ -189,8 +191,8 @@ def main():
                 log(f"Make answered HTTP {r.status}: {r.read().decode(errors='replace')[:200]}")
             with open(marker, "w") as f:
                 f.write(dt.datetime.now().isoformat())
-        except urllib.error.URLError as e:
-            log(f"ERROR sending to Make: {e}")
+        except (urllib.error.URLError, OSError) as e:
+            log(f"ERROR sending to Make: {type(e).__name__}: {e}")
             failures += 1
 
     if held:
