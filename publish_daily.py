@@ -15,11 +15,16 @@ Usage:
   python3 publish_daily.py --dry-run       # generate videos only (no push, no Make)
   python3 publish_daily.py --force         # regenerate videos even if they exist
   python3 publish_daily.py --resend        # send to Make again even if already sent
+  python3 publish_daily.py --allow-missing-cover   # publish a book video even without its cover
 
 Safe to re-run (cron can run it twice as a retry):
   - the video name includes a hash of its script, so an edited script makes a new video;
   - an existing video is reused; nothing is committed twice;
   - a script already sent to Make is skipped (marker in logs/sent/).
+
+Resource check: a script that asks for a "cover" (book videos) is NOT published if the
+image is missing from the repo. The other videos of the day still go out, the run ends
+with an error, and the 10:15 retry picks it up once the cover is uploaded.
 
 Needs in config.json:
   "make_webhook_url": "https://hook.us1.make.com/...",
@@ -95,6 +100,8 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--force", action="store_true", help="regenerate videos even if they exist")
     ap.add_argument("--resend", action="store_true", help="send to Make even if already sent")
+    ap.add_argument("--allow-missing-cover", action="store_true",
+                    help="publish book videos even if their cover image is missing")
     args = ap.parse_args()
 
     with open(CONFIG, encoding="utf-8") as f:
@@ -111,11 +118,21 @@ def main():
         sys.exit(f"No scripts for {args.date} in guiones/. Nothing to do.")
 
     jobs = []
+    held = []
     for script in scripts:
         with open(script, "rb") as f:
             raw = f.read()
         sc = json.loads(raw)
         stem = os.path.splitext(os.path.basename(script))[0]
+        cover = sc.get("cover")
+        if cover and not os.path.isfile(os.path.join(HERE, cover)):
+            if args.allow_missing_cover:
+                log(f"WARNING: cover missing ({cover}), publishing {stem} without it as requested.")
+            else:
+                log(f"ERROR: {stem} needs {cover}, which is not in the repo. Not publishing this "
+                    f"video. Upload the cover (or run with --allow-missing-cover).")
+                held.append(stem)
+                continue
         name = f"{stem}-{hashlib.sha1(raw).hexdigest()[:8]}"
         rel_video = f"docs/videos/{name}.mp4"
         video = os.path.join(HERE, rel_video)
@@ -125,6 +142,9 @@ def main():
         else:
             run([PY, "make_video.py", script, "-o", video])
         jobs.append({"script": script, "sc": sc, "name": name, "rel_video": rel_video})
+
+    if not jobs:
+        sys.exit(f"No videos published for {args.date}; held for missing resources: {', '.join(held)}")
 
     if args.dry_run:
         for j in jobs:
@@ -173,8 +193,11 @@ def main():
             log(f"ERROR sending to Make: {e}")
             failures += 1
 
-    if failures:
-        sys.exit(f"{failures} video(s) failed. Re-run later; sent ones are skipped.")
+    if held:
+        log(f"HELD for missing cover: {', '.join(held)}")
+    if failures or held:
+        sys.exit(f"{failures} video(s) failed, {len(held)} held for missing resources. "
+                 "Re-run later; sent ones are skipped.")
     log("Done. The drafts should appear in SocialBee (category TikTok IA) in a moment.")
 
 

@@ -1,0 +1,15 @@
+{
+  "lang": "es",
+  "tag": "LIBRO · MIÉRCOLES",
+  "brand": "geminislabs.com",
+  "cover": "portadas/B0HGVQWRYW.jpg",
+  "caption": "Mi libro Incident & Diagnostic Playbooks está en Amazon (en inglés). Búscalo como \"Jesús Cabrera Reveles\".",
+  "hashtags": ["#booktok", "#libros", "#programacion", "#techtok"],
+  "slides": [
+    {"screen": "Producción se cayó. ¿Y ahora qué?", "say": "Son las tres de la mañana, producción se cayó y todos opinan a la vez. Nadie sabe por dónde empezar."},
+    {"screen": "Escribí un libro sobre esto", "say": "Escribí un libro sobre cómo atender incidentes con método: guías paso a paso para no improvisar cuando más duele."},
+    {"screen": "Triage, diagnóstico, recuperación", "say": "Te ayuda a priorizar, encontrar la causa, recuperar el servicio y, sobre todo, aprender de cada incidente."},
+    {"screen": "Para quien está de guardia", "say": "Es para ingenieros, equipos de operación y líderes técnicos que responden cuando algo falla en producción."},
+    {"screen": "Está en Amazon", "say": "Está en Amazon, en inglés. Búscalo con mi nombre completo: Jesús Cabrera Reveles. Sígueme para más."}
+  ]
+}

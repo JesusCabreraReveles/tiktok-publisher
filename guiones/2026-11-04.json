@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "ARQUITECTURA · MIÉRCOLES",
+  "brand": "geminislabs.com",
+  "caption": "\"Exactamente una vez\" casi nunca es real. Por qué tus consumidores de eventos deben ser idempotentes y cómo lograrlo.",
+  "hashtags": ["#tecnologia", "#programacion", "#arquitecturadesoftware", "#techtok"],
+  "slides": [
+    {"screen": "Tu mensaje llegará dos veces", "say": "Si tu sistema procesa eventos, tarde o temprano el mismo mensaje te va a llegar dos veces. La pregunta es qué pasa cuando llega."},
+    {"screen": "Mito: exactamente una vez", "say": "Mito: la cola garantiza que cada mensaje llega una sola vez. Realidad: con reintentos y caídas de red, casi siempre es al menos una vez."},
+    {"screen": "1. Dale un identificador único", "say": "Primero, cada evento lleva un identificador único desde su origen. Sin eso no puedes saber si ya lo viste."},
+    {"screen": "2. Guarda lo que ya procesaste", "say": "Segundo, guarda ese identificador en la misma transacción que el cambio. Si ya existe, ignoras el duplicado sin romper nada."},
+    {"screen": "Reintentar debe ser aburrido", "say": "Si reprocesar un mensaje no cambia el resultado, los reintentos dejan de dar miedo. Sígueme para más."}
+  ]
+}
