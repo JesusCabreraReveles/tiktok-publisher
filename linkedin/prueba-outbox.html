@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="15">
+<meta name="size" content="1080x1350">
+<title>Transactional Outbox</title>
+<style>
+  :root {
+    --bg: #0c1a13; --panel: #13281d; --line: #2c5a40;
+    --green: #2ecc71; --lime: #c6f432; --text: #eaf5ee; --muted: #8fb5a0; --red: #ff5a5f;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1080px; height: 1350px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Inter", "DejaVu Sans", sans-serif; color: var(--text); position: relative; }
+  .grid { position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #1d3a2a 2px, transparent 2.5px);
+    background-size: 44px 44px; opacity: .55; }
+  .tag { position: absolute; left: 80px; top: 70px; font-size: 28px; font-weight: 700;
+    letter-spacing: 4px; color: var(--lime); animation: in .5s ease-out 0s both; }
+  .title { position: absolute; left: 80px; top: 120px; width: 920px; font-size: 72px;
+    font-weight: 800; line-height: 1.05; letter-spacing: -1px; }
+  .t1 { animation: in .5s ease-out .1s both, out .4s ease-in 5s forwards; }
+  .t2 { animation: in .5s ease-out 5.45s both; }
+  .t2 span, .t1 span { color: var(--lime); }
+  .bottom { position: absolute; left: 80px; right: 80px; top: 1215px; font-size: 40px;
+    font-weight: 700; text-align: center; animation: in .6s ease-out 10.6s both; }
+  .bottom span { color: var(--lime); }
+  .brand { position: absolute; left: 80px; bottom: 34px; font-size: 22px; color: var(--muted);
+    animation: in .5s 0s both; }
+  .step { position: absolute; right: 80px; bottom: 34px; font-size: 22px; color: var(--muted); }
+  .s1 { animation: in .3s 0s both, out .3s 5s forwards; }
+  .s2 { animation: in .3s 5.45s both; }
+  svg { position: absolute; left: 0; top: 0; }
+  svg text { font-family: "Inter", "DejaVu Sans", sans-serif; fill: var(--text); }
+
+  .box rect { fill: var(--panel); stroke: var(--line); stroke-width: 3; }
+  .box .name { font-size: 36px; font-weight: 700; }
+  .box .sub { font-size: 24px; fill: var(--muted); }
+
+  .draw { fill: none; stroke: var(--green); stroke-width: 6; stroke-linecap: round;
+    stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .flow { fill: none; stroke: var(--lime); stroke-width: 6; stroke-linecap: round;
+    stroke-dasharray: .03 .05; opacity: 0; }
+
+  .b-svc  { animation: pop .5s ease-out .5s both; }
+  .b-db   { animation: pop .5s ease-out .9s both; }
+  .b-kfk  { animation: pop .5s ease-out 1.1s both; }
+  .a-db   { animation: draw .6s ease-in-out 1.6s forwards; }
+  .ok     { animation: pop .4s ease-out 2.4s both, out .3s 5s forwards; }
+  .a-kfk  { stroke-dasharray: 1; animation: drawHalf .5s ease-in 2.9s forwards, out .3s 5s forwards; }
+  .crash  { animation: pop .3s ease-out 3.4s both, shake .4s 3.4s, out .3s 5s forwards; }
+  .lost   { animation: in .4s 3.7s both, out .3s 5s forwards; }
+
+  .rows   { animation: in .4s 5.6s both; }
+  .r-ord  { animation: in .4s 5.7s both; }
+  .r-out  { animation: in .4s 6.1s both; }
+  .txn    { animation: in .4s 6.6s both; }
+  .b-rel  { animation: pop .5s ease-out 7.2s both; }
+  .a-rel  { animation: draw .6s ease-in-out 7.7s forwards; }
+  .a-pub  { animation: draw .6s ease-in-out 8.3s forwards; }
+  .a-con  { animation: draw .5s ease-in-out 8.9s forwards; }
+  .b-con  { animation: pop .5s ease-out 9.2s both; }
+  .flow   { animation: in .3s 9.6s forwards, dash 1s linear 9.6s infinite; }
+
+  .pkt { offset-rotate: 0deg; opacity: 0; }
+  .p1 { offset-path: path("M 540 450 L 540 520 L 270 520 L 270 640");
+        animation: in .1s 1.9s forwards, move .7s ease-in-out 1.9s forwards, out .1s 2.6s forwards; }
+  .p2 { offset-path: path("M 170 900 L 170 1035 L 380 1035 L 700 1035 L 810 1035 L 810 830");
+        animation: in .2s 9.8s forwards, move 1.8s ease-in-out 9.8s infinite; }
+
+  @keyframes in   { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes out  { to { opacity: 0; } }
+  @keyframes pop  { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes drawHalf { to { stroke-dashoffset: .5; } }
+  @keyframes dash { to { stroke-dashoffset: -.08; } }
+  @keyframes move { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+  @keyframes shake { 0%,100% { translate: 0 0; } 25% { translate: -8px 0; } 75% { translate: 8px 0; } }
+  g { transform-box: fill-box; transform-origin: center; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="tag">ARCHITECTURE · WEDNESDAY</div>
+  <div class="title t1">The dual-write trap<br><span>loses events.</span></div>
+  <div class="title t2">The fix:<br><span>Transactional Outbox.</span></div>
+
+  <svg width="1080" height="1350" viewBox="0 0 1080 1350">
+    <!-- arrows (under the boxes) -->
+    <path class="draw a-db" pathLength="1" d="M 540 450 L 540 520 L 270 520 L 270 640"/>
+    <path class="draw a-kfk" pathLength="1" d="M 540 450 L 540 520 L 810 520 L 810 640"
+          style="stroke: var(--red)"/>
+    <path class="draw a-rel" pathLength="1" d="M 170 900 L 170 1035 L 380 1035"/>
+    <path class="draw a-pub" pathLength="1" d="M 700 1035 L 810 1035 L 810 900"/>
+    <path class="draw a-con" pathLength="1" d="M 920 900 L 920 1100"/>
+    <path class="flow" pathLength="1" d="M 170 900 L 170 1035 L 380 1035"/>
+    <path class="flow" pathLength="1" d="M 700 1035 L 810 1035 L 810 900"/>
+
+    <!-- Order service -->
+    <g class="box b-svc">
+      <rect x="370" y="330" width="340" height="120" rx="18"/>
+      <text class="name" x="540" y="385" text-anchor="middle">Order Service</text>
+      <text class="sub" x="540" y="422" text-anchor="middle">POST /orders</text>
+    </g>
+
+    <!-- Database -->
+    <g class="box b-db">
+      <rect x="90" y="640" width="360" height="260" rx="18"/>
+      <text class="name" x="270" y="695" text-anchor="middle">Database</text>
+    </g>
+    <g class="ok">
+      <circle cx="420" cy="660" r="26" fill="var(--green)"/>
+      <path d="M 408 660 L 417 669 L 433 652" fill="none" stroke="#0c1a13" stroke-width="6" stroke-linecap="round"/>
+    </g>
+    <g class="rows">
+      <rect class="r-ord" x="120" y="725" width="300" height="60" rx="10" fill="#1b3a29"/>
+      <text class="r-ord" x="145" y="765" font-size="28" font-weight="600">orders</text>
+      <rect class="r-out" x="120" y="800" width="300" height="60" rx="10" fill="#2a4a12" stroke="var(--lime)" stroke-width="2"/>
+      <text class="r-out" x="145" y="840" font-size="28" font-weight="600" style="fill: var(--lime)">outbox</text>
+    </g>
+    <g class="txn">
+      <path d="M 100 725 L 82 725 L 82 860 L 100 860" fill="none" stroke="var(--lime)" stroke-width="4"/>
+      <text x="200" y="935" font-size="24" style="fill: var(--lime)" font-weight="700">ONE TRANSACTION</text>
+    </g>
+
+    <!-- Kafka -->
+    <g class="box b-kfk">
+      <rect x="630" y="640" width="330" height="260" rx="18"/>
+      <text class="name" x="795" y="720" text-anchor="middle">Kafka</text>
+      <text class="sub" x="795" y="760" text-anchor="middle">order.created</text>
+      <rect x="680" y="800" width="230" height="44" rx="8" fill="#1b3a29"/>
+      <rect x="690" y="810" width="40" height="24" rx="4" style="fill:#2ecc71"/>
+      <rect x="740" y="810" width="40" height="24" rx="4" style="fill:#2ecc71"/>
+      <rect x="790" y="810" width="40" height="24" rx="4" style="fill:#2ecc71" opacity=".5"/>
+    </g>
+
+    <!-- crash on the dual write -->
+    <g class="crash">
+      <circle cx="675" cy="520" r="40" fill="var(--red)"/>
+      <path d="M 657 502 L 693 538 M 693 502 L 657 538" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+    </g>
+    <g class="lost">
+      <rect x="560" y="555" width="420" height="56" rx="12" fill="#3a1416" stroke="var(--red)" stroke-width="2"/>
+      <text x="770" y="592" text-anchor="middle" font-size="26" font-weight="700" style="fill: #ffb3b5">crash here = event lost</text>
+    </g>
+
+    <!-- Relay -->
+    <g class="box b-rel">
+      <rect x="380" y="975" width="320" height="120" rx="18" style="stroke: var(--lime)"/>
+      <text class="name" x="540" y="1030" text-anchor="middle">Outbox Relay</text>
+      <text class="sub" x="540" y="1068" text-anchor="middle">reads → publishes</text>
+    </g>
+
+    <!-- Consumers -->
+    <g class="box b-con">
+      <rect x="730" y="1100" width="260" height="90" rx="18"/>
+      <text class="name" x="860" y="1140" text-anchor="middle" font-size="30">Consumers</text>
+      <text class="sub" x="860" y="1172" text-anchor="middle" font-size="21">billing · shipping</text>
+    </g>
+
+    <!-- moving packets -->
+    <circle class="pkt p1" r="13" fill="var(--lime)"/>
+    <circle class="pkt p2" r="13" fill="var(--lime)"/>
+  </svg>
+
+  <div class="bottom">Same commit, <span>zero lost events.</span></div>
+  <div class="brand">geminislabs.com</div>
+  <div class="step s1">1 / 2 · the problem</div>
+  <div class="step s2">2 / 2 · the fix</div>
+</body>
+</html>

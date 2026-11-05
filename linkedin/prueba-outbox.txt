@@ -1,0 +1,22 @@
+Your order was saved. The event never arrived. Nobody noticed for three days.
+
+That's the dual-write trap: a service writes to its database and then publishes to Kafka as two separate steps. If the process dies between them, the database says "order created" and the rest of the system never hears about it. Retries don't save you, and reversing the order just moves the bug.
+
+The Transactional Outbox fixes it with one boring idea:
+→ Write the order AND an "outbox" row in the same database transaction. Both commit, or neither does.
+→ A separate relay (a poller or CDC like Debezium) reads the outbox and publishes to Kafka.
+→ Consumers handle duplicates idempotently, because the relay delivers at-least-once.
+
+What you get: no event exists without its data, and no data exists without its event.
+What it costs: an extra table, a relay to run and monitor, and a little latency.
+
+If your services publish events, check for this pattern before you check anything else. It's one of the most common silent data-loss bugs I see in event-driven systems.
+
+How do you handle it today: outbox, CDC, or "we retry and hope"?
+
+#SoftwareArchitecture #EventDrivenArchitecture #Kafka #DistributedSystems #Microservices
+
+—
+🔗 Geminis Labs: https://geminislabs.com/
+🎮 Clash of Egos: https://clashofegos.lol/
+📘 Event-Driven Architecture for Real-Time Telemetry: https://www.amazon.com.mx/Event-Driven-Architecture-Real-Time-Telemetry-Contracts-ebook/dp/B0HFTBY42R/ref=sr_1_13?crid=1OK7QFMGLA3HO&dib=eyJ2IjoiMSJ9.gMprwaLPC0uJNDjR1WFegqvYHwNFG8AI9yYeLU_V-Xbjy2FlnhMOOlDNVYPhLgbr_7EOOGgU1V7MdlrhYPiLp6BQ5uww_DVa6xiaJ9giFAFdugr__ZF5crVthH5uX3VfCGzfUb1Ke2FI0P1TSchht4BScxIJI_IQt5DSyR-lXROPKViLQcNJdo_DmEV5DDGHnAUtDIPYK2RBtNecUshUmzh2l1OvC_aGhkE4CgROLuY.CPqf-g1jB_DBTrezDBRBDhyVo9YAb-EZRt3TSjmBaz0&dib_tag=se&keywords=jesus+cabrera+rebeldes&qid=1792437052&sprefix=jesus+cabrera%2Caps%2C168&sr=8-13
