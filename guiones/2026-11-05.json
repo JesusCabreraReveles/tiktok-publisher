@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "FOUNDERS · JUEVES",
+  "brand": "geminislabs.com",
+  "caption": "Tus primeros clientes no llegan solos. Tres cosas que no escalan y que todo fundador debería hacer.",
+  "hashtags": ["#tecnologia", "#emprendimiento", "#startups", "#techtok"],
+  "slides": [
+    {"screen": "Tu primer cliente no llega solo", "say": "Muchos fundadores lanzan su producto, esperan y nadie llega. Al principio, los clientes no te encuentran. Tú vas por ellos."},
+    {"screen": "Haz cosas que no escalan", "say": "Paul Graham, cofundador de Y Combinator, lo resumió en un ensayo famoso: haz cosas que no escalan."},
+    {"screen": "1. Recluta usuarios uno por uno", "say": "Escribe, llama, visita. Consigue tus primeros diez usuarios a mano, aunque se sienta lento."},
+    {"screen": "2. Atiéndelos tú mismo", "say": "Resuelve sus problemas en persona. Ahí aprendes lo que ningún tablero de métricas te va a decir."},
+    {"screen": "3. Automatiza después, no antes", "say": "Primero entiende qué funciona y luego conviértelo en sistema. Automatizar algo que nadie quiere es tirar tiempo. Sígueme para más."}
+  ]
+}
