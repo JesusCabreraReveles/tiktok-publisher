@@ -1,0 +1,15 @@
+{
+  "lang": "es",
+  "tag": "GEMINIS LABS · VIERNES",
+  "brand": "geminislabs.com",
+  "caption": "Tres productos, una sola pregunta: ¿dónde está y qué pasa ahora? Búscalos en geminislabs.com",
+  "hashtags": ["#tecnologia", "#gps", "#emprendimiento", "#iot", "#techtok"],
+  "slides": [
+    {"screen": "Tres productos, una sola pregunta", "say": "Hicimos tres productos que responden la misma pregunta: ¿dónde está y qué está pasando ahora mismo?"},
+    {"screen": "Nexus: rastreo GPS en tiempo real", "say": "Nexus rastrea tu auto o tu flotilla en tiempo real. Se conecta al puerto de diagnóstico y, si lo desconectan, te avisa."},
+    {"screen": "Orion: ubicación sin GPS", "say": "Orion ubica un dispositivo solo con su señal celular. Mandas el identificador de la antena y recibes coordenadas."},
+    {"screen": "Signum: un QR en tu casco", "say": "Signum es un código QR para tu casco con tu ficha médica. Si tienes un accidente, quien te ayuda lo escanea."},
+    {"screen": "Lo difícil no es el mapa", "say": "Lo difícil nunca es el mapa. Es que alguien pueda confiar en el dato cuando más lo necesita."},
+    {"screen": "geminislabs.com", "say": "Conócelos en geminislabs punto com. Sígueme para más."}
+  ]
+}
