@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "TENDENCIAS · VIERNES",
+  "brand": "geminislabs.com",
+  "caption": "Esta semana la IA chocó con el mundo físico: energía, chips y contratos. El límite ya no es el código.",
+  "hashtags": ["#tecnologia", "#ia", "#centrosdedatos", "#techtok"],
+  "slides": [
+    {"screen": "La IA chocó con el mundo físico", "say": "Esta semana quedó claro que el límite de la IA ya no es el código. Es energía, chips y dinero. Tres señales."},
+    {"screen": "1. Google genera su propia energía", "say": "Google anunció un centro de datos de diecisiete mil millones de dólares en Wyoming, con su propia planta de celdas de combustible."},
+    {"screen": "2. Chips atorados en Hong Kong", "say": "Según Reuters, unos seiscientos mil chips hache doscientos de Nvidia esperan en Hong Kong porque China no aprueba su importación."},
+    {"screen": "3. Microsoft aprieta a sus proveedores", "say": "Bloomberg reportó que Microsoft vigila más de cerca a sus nubes de IA. Nebius e IREN cayeron más de trece por ciento."},
+    {"screen": "Diseña para recursos escasos", "say": "Si construyes con IA, mide el costo por tarea, ten un plan con otro proveedor y no asumas cómputo infinito. Sígueme para más."}
+  ]
+}
