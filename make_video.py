@@ -21,9 +21,10 @@ Script format (JSON):
     ...
   ]
 }
-With "cover", by default slide 1 has no cover (it's the hook), the middle slides show a medium
-cover above a smaller headline, and the last slide shows the cover big, alone. A slide can
-override it with "cover": false, "small" or "big".
+With "cover", by default slide 1 shows the cover big, alone (the book is the first thing people
+see, and it makes the thumbnail), the middle slides show a medium cover above a smaller
+headline, and the last slide shows the cover big again. A slide can override it with
+"cover": false, "small" or "big".
 
 Look of each video (v1.1):
   - Color palette by theme. Picked from the file name, so the daily task needs no changes:
@@ -336,7 +337,7 @@ def cover_modes(sc):
     n = len(sc["slides"])
     modes = {}
     for i, s in enumerate(sc["slides"]):
-        default = None if i == 0 else ("big" if i == n - 1 else "small")
+        default = "big" if i in (0, n - 1) else "small"
         m = s.get("cover", default)
         if m is True:
             m = "big"
