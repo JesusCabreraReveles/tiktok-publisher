@@ -58,17 +58,15 @@ python3 render_diagram.py linkedin/prueba-outbox.html --still /tmp/cuadro.png --
 2. `publish_daily.py` (cron de la Pi, el mismo de TikTok) convierte cada par en
    `docs/videos/li-<nombre>-<hash>.mp4`, lo sube junto con los de TikTok y manda a Make:
    `{"caption": <texto del post>, "video_url": ..., "platform": "linkedin"}`.
-3. Make (escenario "LinkedIn video", clon del de TikTok) → SocialBee, categoría **LinkedIn IA**,
-   Approved: No. Jesús lo revisa y le da Share now.
+3. Make: usa **el mismo escenario de TikTok** (ya crea el borrador con el perfil de LinkedIn).
+   El borrador llega a SocialBee (categoría TikTok IA), en inglés y con el video: se publica
+   tal cual en LinkedIn, **sin cambiarlo a TikTok**.
 
-En `config.json` de la Pi:
-
-```json
-"make_webhook_linkedin_url": "https://hook.us1.make.com/..."
-```
+Opcional: si algún día se quiere separar (otra categoría), se clona el escenario de Make y se
+pone su URL en `config.json` como `"make_webhook_linkedin_url"`; sin esa línea se usa el de TikTok.
 
 Si algo falla en un post de LinkedIn (no hay `.txt`, falta una portada, falla el render o
-no está configurado el webhook), **ese post se detiene y los videos de TikTok salen igual**.
+falla el envío), **ese post se detiene y los videos de TikTok salen igual**.
 La corrida termina con error para que el reintento lo vuelva a intentar. Nada se manda dos veces.
 
 ```bash

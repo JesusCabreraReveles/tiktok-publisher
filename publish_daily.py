@@ -11,8 +11,9 @@ publish_daily.py - Daily TikTok pipeline for the Raspberry Pi.
 
 LinkedIn (plan v3): Claude also leaves linkedin/YYYY-MM-DD[-name].html (animated diagram)
 plus linkedin/YYYY-MM-DD[-name].txt (the post). Each pair becomes
-docs/videos/li-<name>-<hash>.mp4 (render_diagram.py) and goes to a second Make webhook
-("make_webhook_linkedin_url") with the post text. A LinkedIn problem never stops the
+docs/videos/li-<name>-<hash>.mp4 (render_diagram.py) and goes to Make with the post text:
+to "make_webhook_linkedin_url" if set, otherwise to the same "make_webhook_url" as TikTok
+(that scenario already creates the draft on the LinkedIn profile). A LinkedIn problem never stops the
 TikTok videos: that post is held, the others go out, and the run ends with an error.
 
 Usage:
@@ -37,7 +38,8 @@ Needs in config.json:
   "pages_base_url":   "https://jesuscabrerareveles.github.io/tiktok-publisher/"
 Optional:
   "tiktok_privacy":   "PUBLIC_TO_EVERYONE"   (sent to Make as "privacy")
-  "make_webhook_linkedin_url": "https://hook.us1.make.com/..."   (LinkedIn videos)
+  "make_webhook_linkedin_url": "https://hook.us1.make.com/..."   (LinkedIn videos; default:
+                                the TikTok webhook)
 """
 import argparse
 import datetime as dt
@@ -137,7 +139,7 @@ def main():
         cfg = json.load(f)
     base = cfg.get("pages_base_url", "").rstrip("/") + "/"
     hook = cfg.get("make_webhook_url", "")
-    li_hook = cfg.get("make_webhook_linkedin_url", "")
+    li_hook = cfg.get("make_webhook_linkedin_url") or hook
     if not args.dry_run and (not hook or not base.startswith("http")):
         sys.exit("config.json needs make_webhook_url and pages_base_url")
 
@@ -184,7 +186,7 @@ def main():
             held.append(f"linkedin/{stem}")
             continue
         if not li_hook and not args.dry_run:
-            log(f"ERROR: config.json has no make_webhook_linkedin_url. linkedin/{stem} held.")
+            log(f"ERROR: config.json has no Make webhook. linkedin/{stem} held.")
             held.append(f"linkedin/{stem}")
             continue
         with open(html_path, "rb") as f:
@@ -289,7 +291,7 @@ def main():
         sys.exit(f"{failures} video(s) failed, {len(held)} held. "
                  "Re-run later; sent ones are skipped.")
     log("Done. The drafts should appear in SocialBee in a moment "
-        "(TikTok videos: category TikTok IA; LinkedIn posts: category LinkedIn IA).")
+        "(LinkedIn posts are the ones in English: publish them as they are).")
 
 
 if __name__ == "__main__":
