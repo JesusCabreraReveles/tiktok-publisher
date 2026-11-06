@@ -9,6 +9,12 @@ publish_daily.py - Daily TikTok pipeline for the Raspberry Pi.
   4. wait until the URLs are live
   5. POST to the Make webhook       -> Make creates a draft in SocialBee for each video
 
+LinkedIn (plan v3): Claude also leaves linkedin/YYYY-MM-DD[-name].html (animated diagram)
+plus linkedin/YYYY-MM-DD[-name].txt (the post). Each pair becomes
+docs/videos/li-<name>-<hash>.mp4 (render_diagram.py) and goes to a second Make webhook
+("make_webhook_linkedin_url") with the post text. A LinkedIn problem never stops the
+TikTok videos: that post is held, the others go out, and the run ends with an error.
+
 Usage:
   python3 publish_daily.py                 # today's scripts
   python3 publish_daily.py --date 2026-10-21
@@ -31,6 +37,7 @@ Needs in config.json:
   "pages_base_url":   "https://jesuscabrerareveles.github.io/tiktok-publisher/"
 Optional:
   "tiktok_privacy":   "PUBLIC_TO_EVERYONE"   (sent to Make as "privacy")
+  "make_webhook_linkedin_url": "https://hook.us1.make.com/..."   (LinkedIn videos)
 """
 import argparse
 import datetime as dt
@@ -38,6 +45,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -96,6 +104,25 @@ def find_scripts(date):
     return found
 
 
+def find_linkedin(date):
+    pats = [os.path.join(HERE, "linkedin", f"{date}.html"),
+            os.path.join(HERE, "linkedin", f"{date}-*.html")]
+    found = []
+    for p in pats:
+        found += sorted(glob.glob(p))
+    return found
+
+
+def missing_images(html):
+    """Local images (e.g. ../portadas/X.jpg) that the diagram uses but are not in the repo."""
+    base = os.path.join(HERE, "linkedin")
+    out = []
+    for src in re.findall(r'(?:src|href)="([^"#:]+\.(?:jpg|jpeg|png|webp|svg))"', html):
+        if not os.path.isfile(os.path.normpath(os.path.join(base, src))):
+            out.append(src)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", default=dt.date.today().isoformat())
@@ -110,14 +137,16 @@ def main():
         cfg = json.load(f)
     base = cfg.get("pages_base_url", "").rstrip("/") + "/"
     hook = cfg.get("make_webhook_url", "")
+    li_hook = cfg.get("make_webhook_linkedin_url", "")
     if not args.dry_run and (not hook or not base.startswith("http")):
         sys.exit("config.json needs make_webhook_url and pages_base_url")
 
     run(["git", "pull", "--ff-only", "--quiet"])
 
     scripts = find_scripts(args.date)
-    if not scripts:
-        sys.exit(f"No scripts for {args.date} in guiones/. Nothing to do.")
+    posts = find_linkedin(args.date)
+    if not scripts and not posts:
+        sys.exit(f"No scripts for {args.date} in guiones/ or linkedin/. Nothing to do.")
 
     jobs = []
     held = []
@@ -143,14 +172,62 @@ def main():
             log(f"Video already exists, reusing it: {rel_video}")
         else:
             run([PY, "make_video.py", script, "-o", video])
-        jobs.append({"script": script, "sc": sc, "name": name, "rel_video": rel_video})
+        jobs.append({"kind": "tiktok", "script": script, "sc": sc, "name": name,
+                     "rel_video": rel_video})
+
+    # LinkedIn: animated diagram + post text. Any problem holds only that post.
+    for html_path in posts:
+        stem = os.path.splitext(os.path.basename(html_path))[0]
+        txt_path = os.path.splitext(html_path)[0] + ".txt"
+        if not os.path.isfile(txt_path):
+            log(f"ERROR: linkedin/{stem}.html has no linkedin/{stem}.txt (the post text). Held.")
+            held.append(f"linkedin/{stem}")
+            continue
+        if not li_hook and not args.dry_run:
+            log(f"ERROR: config.json has no make_webhook_linkedin_url. linkedin/{stem} held.")
+            held.append(f"linkedin/{stem}")
+            continue
+        with open(html_path, "rb") as f:
+            raw_html = f.read()
+        with open(txt_path, "rb") as f:
+            raw_txt = f.read()
+        lost = missing_images(raw_html.decode("utf-8", errors="replace"))
+        if lost and not args.allow_missing_cover:
+            log(f"ERROR: linkedin/{stem} uses images that are not in the repo: {', '.join(lost)}. "
+                f"Held (upload them, or run with --allow-missing-cover).")
+            held.append(f"linkedin/{stem}")
+            continue
+        text = raw_txt.decode("utf-8").strip()
+        if not text:
+            log(f"ERROR: linkedin/{stem}.txt is empty. Held.")
+            held.append(f"linkedin/{stem}")
+            continue
+        name = f"li-{stem}-{hashlib.sha1(raw_html + raw_txt).hexdigest()[:8]}"
+        rel_video = f"docs/videos/{name}.mp4"
+        video = os.path.join(HERE, rel_video)
+        os.makedirs(os.path.dirname(video), exist_ok=True)
+        if os.path.exists(video) and not args.force:
+            log(f"Video already exists, reusing it: {rel_video}")
+        else:
+            try:
+                run([PY, "render_diagram.py", html_path, "-o", video])
+            except subprocess.CalledProcessError as e:
+                log(f"ERROR rendering linkedin/{stem}: {e}. Held.")
+                if os.path.exists(video):
+                    os.remove(video)
+                held.append(f"linkedin/{stem}")
+                continue
+        jobs.append({"kind": "linkedin", "text": text, "name": name, "rel_video": rel_video})
 
     if not jobs:
-        sys.exit(f"No videos published for {args.date}; held for missing resources: {', '.join(held)}")
+        sys.exit(f"No videos published for {args.date}; held: {', '.join(held)}")
 
     if args.dry_run:
         for j in jobs:
-            log(f"Dry run: {j['rel_video']}\nCaption:\n{build_caption(j['sc'])}")
+            text = j["text"] if j["kind"] == "linkedin" else build_caption(j["sc"])
+            log(f"Dry run ({j['kind']}): {j['rel_video']}\nCaption:\n{text}")
+        if held:
+            log(f"HELD: {', '.join(held)}")
         return
 
     run(["git", "add"] + [j["rel_video"] for j in jobs])
@@ -174,16 +251,27 @@ def main():
             log("ERROR: the video never went live on GitHub Pages. Check the Pages build.")
             failures += 1
             continue
-        payload = {
-            "date": args.date,
-            "caption": build_caption(j["sc"]),
-            "video_url": url,
-            "lang": j["sc"].get("lang", "en"),
-            # SocialBee requires a TikTok privacy mode; kept for when its Make module supports it.
-            "privacy": cfg.get("tiktok_privacy", "PUBLIC_TO_EVERYONE"),
-        }
+        if j["kind"] == "linkedin":
+            target = li_hook
+            payload = {
+                "date": args.date,
+                "caption": j["text"][:3000],   # LinkedIn's post limit
+                "video_url": url,
+                "lang": "en",
+                "platform": "linkedin",
+            }
+        else:
+            target = hook
+            payload = {
+                "date": args.date,
+                "caption": build_caption(j["sc"]),
+                "video_url": url,
+                "lang": j["sc"].get("lang", "en"),
+                # SocialBee requires a TikTok privacy mode; kept for when its Make module supports it.
+                "privacy": cfg.get("tiktok_privacy", "PUBLIC_TO_EVERYONE"),
+            }
         req = urllib.request.Request(
-            hook, data=json.dumps(payload).encode(), method="POST",
+            target, data=json.dumps(payload).encode(), method="POST",
             headers={"Content-Type": "application/json"},
         )
         try:
@@ -196,11 +284,12 @@ def main():
             failures += 1
 
     if held:
-        log(f"HELD for missing cover: {', '.join(held)}")
+        log(f"HELD (see the errors above): {', '.join(held)}")
     if failures or held:
-        sys.exit(f"{failures} video(s) failed, {len(held)} held for missing resources. "
+        sys.exit(f"{failures} video(s) failed, {len(held)} held. "
                  "Re-run later; sent ones are skipped.")
-    log("Done. The drafts should appear in SocialBee (category TikTok IA) in a moment.")
+    log("Done. The drafts should appear in SocialBee in a moment "
+        "(TikTok videos: category TikTok IA; LinkedIn posts: category LinkedIn IA).")
 
 
 if __name__ == "__main__":

@@ -1,10 +1,9 @@
-# Diagramas animados para LinkedIn (plan v3, paso 1)
+# Diagramas animados para LinkedIn (plan v3)
 
 Convierte un diagrama animado (un archivo HTML) en un video MP4 para LinkedIn.
 Claude escribe el HTML y la Raspberry Pi lo convierte en video. Costo extra: $0.
 
-Este paso todavía **no** cambia el flujo diario: `publish_daily.py` solo lee `guiones/`,
-y los diagramas viven en `linkedin/`. La conexión con Make y SocialBee es el paso 2.
+Los diagramas viven en `linkedin/` (nunca en `guiones/`, que es solo para TikTok).
 
 ## Instalación en la Raspberry Pi (una sola vez)
 
@@ -31,8 +30,8 @@ Las fuentes (`fonts-inter`) y `ffmpeg` ya están instalados por el flujo de TikT
 python3 render_diagram.py linkedin/prueba-outbox.html -o /tmp/prueba-outbox.mp4
 ```
 
-Al terminar muestra el tamaño y cuánto tardó. En el servidor de Claude tardó 30 s;
-en la Pi 5 calculo de 1 a 3 minutos. Para revisar un solo cuadro sin hacer todo el video:
+Al terminar muestra el tamaño y cuánto tardó. En la Pi 5, un video de 15 s tarda 48 s.
+Para revisar un solo cuadro sin hacer todo el video:
 
 ```bash
 python3 render_diagram.py linkedin/prueba-outbox.html --still /tmp/cuadro.png --at 9
@@ -50,10 +49,28 @@ python3 render_diagram.py linkedin/prueba-outbox.html --still /tmp/cuadro.png --
 - Colores del miércoles: verde + lima (los mismos que TikTok).
 - El texto del post va aparte, en `linkedin/<nombre>.txt`, en inglés y con el footer.
 
-## Siguiente paso (paso 2)
+## Flujo diario (paso 2)
 
-1. La tarea diaria de LinkedIn guarda `linkedin/AAAA-MM-DD.html` y `linkedin/AAAA-MM-DD.txt`.
-2. `publish_daily.py` (o un script hermano) los convierte en MP4, los publica en GitHub Pages
-   y manda texto + URL del video a un webhook de Make nuevo → SocialBee (perfil LinkedIn,
-   categoría LinkedIn IA, Approved: No).
-3. Antes: la limpieza automática de videos (v1.3), porque GitHub Pages tiene límite de 1 GB.
+1. La tarea de Claude guarda, para cada post con video:
+   - `linkedin/AAAA-MM-DD.html` (diagrama) + `linkedin/AAAA-MM-DD.txt` (texto del post), y
+   - los miércoles, también `linkedin/AAAA-MM-DD-book.html` + `.txt` (post del libro, abre con
+     la portada: `<img src="../portadas/<código>.jpg">`).
+2. `publish_daily.py` (cron de la Pi, el mismo de TikTok) convierte cada par en
+   `docs/videos/li-<nombre>-<hash>.mp4`, lo sube junto con los de TikTok y manda a Make:
+   `{"caption": <texto del post>, "video_url": ..., "platform": "linkedin"}`.
+3. Make (escenario "LinkedIn video", clon del de TikTok) → SocialBee, categoría **LinkedIn IA**,
+   Approved: No. Jesús lo revisa y le da Share now.
+
+En `config.json` de la Pi:
+
+```json
+"make_webhook_linkedin_url": "https://hook.us1.make.com/..."
+```
+
+Si algo falla en un post de LinkedIn (no hay `.txt`, falta una portada, falla el render o
+no está configurado el webhook), **ese post se detiene y los videos de TikTok salen igual**.
+La corrida termina con error para que el reintento lo vuelva a intentar. Nada se manda dos veces.
+
+```bash
+python3 publish_daily.py --dry-run     # genera los videos sin subir ni mandar nada
+```
