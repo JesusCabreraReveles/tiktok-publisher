@@ -36,12 +36,15 @@ REF_NOSE = (789, 537)          # nose of gato_piensa; every pose is moved so its
 LEVELS = [0, 10, 20, 30]
 FADE_PX = 130                  # bottom of the torso fades out over this many pixels
 
-# which poses fit each part of a video (the script can still ask for a specific one)
+# poses picked on their own for each part of a video: only neutral ones, so the cat never
+# disagrees with what is being said. The rest (sarcasmo, duda, preocupado, aprobado, rechazo)
+# appear only when the script asks for them with "gato": "<pose>".
 ROLE_POSES = {
-    "hook": ["piensa", "sorpresa", "sarcasmo", "saluda"],
-    "middle": ["explica", "idea", "lentes", "senala", "duda", "preocupado", "aprobado", "rechazo"],
+    "hook": ["piensa", "sorpresa", "saluda"],
+    "middle": ["explica", "idea", "lentes", "senala"],
     "close": ["pulgar", "excelente"],
 }
+NUMBER_POSES = {1: "uno", 2: "dos", 3: "tres"}   # slides whose headline starts with "1." etc.
 
 
 # ---------------------------------------------------------------- calibration
