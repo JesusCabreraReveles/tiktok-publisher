@@ -23,7 +23,7 @@ cd ~/tiktok-publisher
 
 python3 -m venv .venv
 source .venv/bin/activate
-pip install kokoro-onnx soundfile pillow numpy
+pip install kokoro-onnx soundfile pillow numpy scipy
 
 mkdir -p voices && cd voices
 wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
@@ -66,6 +66,25 @@ python3 make_video.py guiones/ejemplo_es.json -o tiktok_es.mp4
 - Hashtags: de 3 a 5, uno amplio (`#ai`, `#tech`), dos del tema del día y uno de comunidad (`#techtok`).
 
 El diseño deja libre la franja derecha y la parte de abajo, que TikTok tapa con sus botones y la descripción.
+
+## El gato (avatar, v1.3)
+
+En algunos videos aparece "el gato" entre el titular y los subtítulos: mueve la boca con la voz,
+parpadea y cambia de pose en cada slide. Las fotos de Pixabay siguen saliendo detrás de él.
+
+- **Qué videos lo llevan:** se eligen al azar, pero siempre igual para el mismo archivo. En
+  `config.json`, `"gato_probabilidad": 50` es el porcentaje de videos con gato (0 lo apaga).
+  Nunca sale en los videos de libros.
+- **Forzarlo:** `"gato": true` o `"gato": false` arriba del guion.
+- **Pose por slide (opcional):** `"gato": "idea"` en un slide. Si no se pide, se elige sola:
+  gancho (`piensa`, `sorpresa`, `sarcasmo`, `saluda`), en medio (`explica`, `idea`, `lentes`,
+  `senala`, `duda`, `preocupado`, `aprobado`, `rechazo`) y cierre (`pulgar`, `excelente`).
+  Para listas numeradas están `uno`, `dos` y `tres`. `"gato": false` en un slide lo oculta ahí.
+- **Imágenes:** `avatar/gato_<pose>.png`, 1254×1254 con fondo azul marino. Una pose nueva solo
+  necesita su archivo; nariz, boca y ojos se miden solos. Para revisarlas todas:
+  `python3 avatar.py --sheet hoja.png`.
+- Necesita `scipy` (`pip install scipy`). Si falta, o faltan las imágenes, el video sale igual
+  pero sin gato.
 
 ## Flujo diario (publish_daily.py)
 

@@ -4,5 +4,6 @@
   "redirect_uri": "https://jesuscabrerareveles.github.io/tiktok-publisher/",
   "scopes": "user.info.basic,video.upload,video.publish",
   "make_webhook_url": "PEGA_AQUI_LA_URL_DEL_WEBHOOK_DE_MAKE",
-  "pages_base_url": "https://jesuscabrerareveles.github.io/tiktok-publisher/"
+  "pages_base_url": "https://jesuscabrerareveles.github.io/tiktok-publisher/",
+  "gato_probabilidad": 50
 }
