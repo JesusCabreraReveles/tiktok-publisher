@@ -24,6 +24,14 @@ Usage:
   python3 publish_daily.py --resend        # send to Make again even if already sent
   python3 publish_daily.py --allow-missing-cover   # publish a book video even without its cover
 
+Raspberry Pi power: videos are rendered on 2 cores with low priority ("render_cores" in
+config.json, default 2; 0 = all cores). Rendering on all 4 cores made the Pi reboot from
+undervoltage during "Encoding video".
+
+GitHub Pages: if a video is not live after 8 minutes (a deploy stuck "Queued" happens), an
+empty commit is pushed to start a new Pages deploy, and it waits 10 more minutes. A cron
+retry does the same, so a stuck deploy no longer blocks the drafts.
+
 Safe to re-run (cron can run it twice as a retry):
   - the video name includes a hash of its script, so an edited script makes a new video;
   - an existing video is reused; nothing is committed twice;
@@ -48,6 +56,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -64,9 +73,32 @@ def log(msg):
     print(f"[{dt.datetime.now():%Y-%m-%d %H:%M:%S}] {msg}", flush=True)
 
 
-def run(cmd):
+def run(cmd, env=None):
     log("$ " + " ".join(cmd))
-    subprocess.run(cmd, cwd=HERE, check=True)
+    subprocess.run(cmd, cwd=HERE, check=True, env=env)
+
+
+def render(cmd, cfg):
+    """Run a render (make_video / render_diagram) on few cores and low priority, so the Pi
+    draws less current (it rebooted from undervoltage when all 4 cores encoded)."""
+    cores = int(cfg.get("render_cores", 2) or 0)
+    env = dict(os.environ)
+    if cores > 0:
+        env["OMP_NUM_THREADS"] = str(cores)
+        prefix = ["nice", "-n", "10"] if shutil.which("nice") else []
+        if shutil.which("taskset"):
+            prefix += ["taskset", "-c", ",".join(str(i) for i in range(cores))]
+        cmd = prefix + cmd
+    run(cmd, env=env)
+
+
+def redeploy_pages(date):
+    """Start a new GitHub Pages deploy with an empty commit (a deploy sometimes stays
+    "Queued" for hours; a newer one goes through)."""
+    log("Pages looks stuck: pushing an empty commit to start a new deploy.")
+    run(["git", "pull", "--rebase", "--quiet"])
+    run(["git", "commit", "--allow-empty", "--quiet", "-m", f"Re-deploy Pages ({date})"])
+    run(["git", "push", "--quiet"])
 
 
 def build_caption(sc):
@@ -173,7 +205,7 @@ def main():
         if os.path.exists(video) and not args.force:
             log(f"Video already exists, reusing it: {rel_video}")
         else:
-            run([PY, "make_video.py", script, "-o", video])
+            render([PY, "make_video.py", script, "-o", video], cfg)
         jobs.append({"kind": "tiktok", "script": script, "sc": sc, "name": name,
                      "rel_video": rel_video})
 
@@ -212,7 +244,7 @@ def main():
             log(f"Video already exists, reusing it: {rel_video}")
         else:
             try:
-                run([PY, "render_diagram.py", html_path, "-o", video])
+                render([PY, "render_diagram.py", html_path, "-o", video], cfg)
             except subprocess.CalledProcessError as e:
                 log(f"ERROR rendering linkedin/{stem}: {e}. Held.")
                 if os.path.exists(video):
@@ -242,6 +274,7 @@ def main():
 
     os.makedirs(SENT_DIR, exist_ok=True)
     failures = 0
+    redeployed = False
     for j in jobs:
         marker = os.path.join(SENT_DIR, j["name"])
         if os.path.exists(marker) and not args.resend:
@@ -249,7 +282,12 @@ def main():
             continue
         url = base + j["rel_video"][len("docs/"):]
         log(f"Waiting for {url}")
-        if not wait_live(url):
+        live = wait_live(url, minutes=3 if redeployed else 8)
+        if not live and not redeployed:
+            redeploy_pages(args.date)
+            redeployed = True
+            live = wait_live(url, minutes=10)
+        if not live:
             log("ERROR: the video never went live on GitHub Pages. Check the Pages build.")
             failures += 1
             continue
