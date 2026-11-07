@@ -12,3 +12,6 @@ logs/
 # Daily videos are published through GitHub Pages
 !docs/videos/
 !docs/videos/*.mp4
+
+# Pixabay cache (photos.py)
+cache/

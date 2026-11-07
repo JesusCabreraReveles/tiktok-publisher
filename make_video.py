@@ -21,6 +21,12 @@ Script format (JSON):
     ...
   ]
 }
+Background photos (v1.2): a slide can have "photo": "2-4 English keywords" (e.g. "server room").
+The photo is searched on Pixabay (photos.py, needs "pixabay_api_key" in config.json), darkened
+and put behind the text; a small "Foto: Pixabay" credit is shown. A top-level "photo" is used
+for slides without their own. Slides with the big book cover never get a photo. If there is no
+key or no result, the slide keeps the normal background.
+
 With "cover", by default slide 1 shows the cover big, alone (the book is the first thing people
 see, and it makes the thumbnail), the middle slides show a medium cover above a smaller
 headline, and the last slide shows the cover big again. A slide can override it with
@@ -346,10 +352,34 @@ def cover_modes(sc):
     return modes
 
 
-def draw_frame(theme, tag, brand, headline, caption, idx, total, progress, cover=None):
+def photo_layer(path):
+    """Background photo for a slide: cover-cropped to the frame, darkened so the white text
+    stays readable, and slightly transparent so the moving pattern still shows a little."""
+    try:
+        im = Image.open(path).convert("RGB")
+    except Exception as e:
+        print(f"  warning: could not open photo {path}: {e}")
+        return None
+    scale = max(W / im.width, H / im.height)
+    im = im.resize((round(im.width * scale), round(im.height * scale)), Image.LANCZOS)
+    x, y = (im.width - W) // 2, (im.height - H) // 2
+    im = im.crop((x, y, x + W, y + H)).filter(ImageFilter.GaussianBlur(1.5))
+    arr = np.asarray(im).astype("float32") * 0.5            # darken
+    # extra shade at the top (tag) and in the text band, lighter in between
+    ys = np.linspace(0, 1, H)[:, None, None]
+    shade = 1 - 0.25 * np.exp(-((ys - 0.5) ** 2) / 0.02)
+    arr = (arr * shade).clip(0, 255).astype("uint8")
+    out = Image.fromarray(arr, "RGB").convert("RGBA")
+    out.putalpha(225)
+    return out
+
+
+def draw_frame(theme, tag, brand, headline, caption, idx, total, progress, cover=None, photo=None):
     """Transparent layer with all the text; it goes on top of the moving background."""
     t = THEMES[theme]
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    if photo is not None:
+        img.alpha_composite(photo)
     d = ImageDraw.Draw(img)
 
     # tag pill
@@ -410,6 +440,10 @@ def draw_frame(theme, tag, brand, headline, caption, idx, total, progress, cover
     # brand
     fb = ImageFont.truetype(FONT_SEMI, 34)
     d.text((SAFE_LEFT, by + 34), brand, font=fb, fill=MUTED)
+    if photo is not None:
+        fcr = ImageFont.truetype(FONT_SEMI, 26)
+        cr = "Foto: Pixabay"
+        d.text((SAFE_RIGHT - d.textlength(cr, font=fcr), by + 40), cr, font=fcr, fill=MUTED)
     return img
 
 
@@ -451,6 +485,17 @@ def main():
         m = modes.get(i)
         return (m, covers[m]) if m else None
 
+    photos = {}
+    for i, s in enumerate(slides):
+        q = s.get("photo", sc.get("photo"))
+        if not q or modes.get(i) == "big":
+            continue
+        from photos import get_photo
+        path = get_photo(q, seed=seed + i)
+        layer = photo_layer(path) if path else None
+        if layer is not None:
+            photos[i] = layer
+
     if args.still:
         bg = background(theme, pattern, seed)
         cx, cy = PAN // 2, PAN // 2
@@ -458,7 +503,7 @@ def main():
         i = min(max(args.slide, 1), len(slides)) - 1
         cap = caption_chunks(slides[i]["say"], 1)[0][0]
         frame.alpha_composite(draw_frame(theme, tag, brand, slides[i]["screen"], cap, i, len(slides),
-                                         (i + 0.5) / len(slides), cover_for(i)))
+                                         (i + 0.5) / len(slides), cover_for(i), photos.get(i)))
         frame.convert("RGB").save(args.still)
         print(f"Done: {args.still}")
         return
@@ -493,7 +538,7 @@ def main():
             for cap, cdur in chunks:
                 t += cdur
                 img = draw_frame(theme, tag, brand, s["screen"], cap, i, len(slides), t / total_dur,
-                                 cover_for(i))
+                                 cover_for(i), photos.get(i))
                 p = os.path.join(work, f"f{n:04d}.png")
                 img.save(p)
                 concat_lines += [f"file '{p}'", f"duration {cdur:.3f}"]
