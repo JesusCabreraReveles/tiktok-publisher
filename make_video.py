@@ -27,12 +27,13 @@ and put behind the text; a small "Foto: Pixabay" credit is shown. A top-level "p
 for slides without their own. Slides with the big book cover never get a photo. If there is no
 key or no result, the slide keeps the normal background.
 
-The cat avatar (v1.3, avatar.py): a talking cartoon cat under the headline, one pose per slide
-(hook / middle / close), mouth moving with the voice. It is added to a share of the videos
-picked at random but repeatable from the file name ("gato_probabilidad" in config.json, default
-50 = half of them). Never in book videos. "gato": true / false at the top of the script forces it
-on or off. A slide can ask for a pose with "gato": "<pose>" (see avatar.ROLE_POSES, e.g. "idea",
-"duda", "tres") or hide the cat with "gato": false. Photos still show behind the cat.
+The panda avatar (v1.3, avatar.py): a talking cartoon panda (Jesús) under the headline, one pose
+per slide (hook / middle / close; "1." "2." "3." headlines count with the fingers), mouth moving
+with the voice. It is added to a share of the videos picked at random but repeatable from the
+file name ("panda_probabilidad" in config.json, default 50 = half of them). Never in book videos.
+"panda": true / false at the top of the script forces it on or off. A slide can ask for a pose
+with "panda": "<pose>" (see avatar.py, e.g. "idea", "duda", "rechazo") or hide it with
+"panda": false. Photos still show behind the panda.
 
 With "cover", by default slide 1 shows the cover big, alone (the book is the first thing people
 see, and it makes the thumbnail), the middle slides show a medium cover above a smaller
@@ -81,11 +82,11 @@ WHITE = (255, 255, 255)
 MUTED = (170, 176, 200)
 DARK = (14, 14, 22)
 
-# the cat sits between the headline and the captions
+# the panda sits between the headline and the captions
 CAT_W = 380           # width of a ~1000 px body (all poses use the same scale)
 CAT_CX = 500          # centre of the safe area
 CAT_BOTTOM = 1240     # bottom fades out behind the captions
-CAT_HEADLINE_H = 380  # headline gets less room when the cat is on
+CAT_HEADLINE_H = 380  # headline gets less room when the panda is on
 
 # TikTok covers the right edge and the bottom with its own buttons/caption.
 SAFE_LEFT, SAFE_RIGHT = 90, W - 170
@@ -397,22 +398,22 @@ def load_config():
 
 
 def wants_cat(script_path, sc, theme):
-    """True if this video gets the cat. Books never; "gato" in the script wins; otherwise a
+    """True if this video gets the panda. Books never; "panda" in the script wins; otherwise a
     repeatable coin toss from the file name."""
     if theme == "book" or sc.get("cover"):
         return False
-    if isinstance(sc.get("gato"), bool):
-        return sc["gato"]
-    prob = load_config().get("gato_probabilidad", 50)
+    if isinstance(sc.get("panda"), bool):
+        return sc["panda"]
+    prob = load_config().get("panda_probabilidad", 50)
     h = int(hashlib.sha1(os.path.basename(script_path).encode()).hexdigest(), 16)
     return h % 100 < prob
 
 
 def cat_poses(sc, seed):
-    """Pose name (or None = no cat) for each slide."""
+    """Pose name (or None = no panda) for each slide."""
     import avatar
     slides = sc["slides"]
-    req = [s.get("gato") if isinstance(s.get("gato"), str) else None for s in slides]
+    req = [s.get("panda") if isinstance(s.get("panda"), str) else None for s in slides]
     for i, s in enumerate(slides):           # "1. ...", "2) ..." headlines count with the fingers
         m = re.match(r"\s*([1-3])\s*[.):\-]", s.get("screen", ""))
         if m and not req[i]:
@@ -421,7 +422,7 @@ def cat_poses(sc, seed):
     req = [r if r in have else None for r in req]
     poses = avatar.pick_poses(len(slides), random.Random(seed), req)
     poses = [p if p in have else (sorted(have)[0] if have else None) for p in poses]
-    return [None if s.get("gato") is False else p for s, p in zip(slides, poses)]
+    return [None if s.get("panda") is False else p for s, p in zip(slides, poses)]
 
 
 def photo_layer(path):
@@ -449,8 +450,8 @@ def photo_layer(path):
 def draw_frame(theme, tag, brand, headline, caption, idx, total, progress, cover=None, photo=None,
                cat=False):
     """Transparent layer with all the text; it goes on top of the moving background.
-    cat=True: smaller headline (room for the cat), and the photo is not drawn here because it
-    goes in its own layer under the cat (only the credit is written)."""
+    cat=True: smaller headline (room for the panda), and the photo is not drawn here because it
+    goes in its own layer under the panda (only the credit is written)."""
     t = THEMES[theme]
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     if photo is not None and not cat:
@@ -533,8 +534,8 @@ def pan_expr(seed, dur):
 
 def encode_with_cat(work, bg_path, text_list, audio_path, px, py, enc, photos, poses, spans, samples,
                     sr, seed):
-    """Layers, bottom to top: moving background, slide photo, talking cat, text.
-    The cat is drawn frame by frame in Python and piped to ffmpeg."""
+    """Layers, bottom to top: moving background, slide photo, talking panda, text.
+    The panda is drawn frame by frame in Python and piped to ffmpeg."""
     import avatar
 
     # photo layer: one image per slide (transparent when the slide has no photo)
@@ -552,7 +553,7 @@ def encode_with_cat(work, bg_path, text_list, audio_path, px, py, enc, photos, p
     with open(photo_list, "w") as f:
         f.write("\n".join(lines))
 
-    cat = avatar.Cat([p for p in poses if p], CAT_W)
+    cat = avatar.Rig([p for p in poses if p], CAT_W)
     anim = avatar.Animator(cat, samples, sr, seed=seed)
     pad = 40
     cw, ch = cat.size[0] + 2 * pad, cat.size[1] + 2 * pad
@@ -648,10 +649,10 @@ def main():
             if not any(poses):
                 poses = None
         except Exception as e:          # missing scipy, missing images...: video without cat
-            print(f"  warning: no cat this time ({e})")
+            print(f"  warning: no panda this time ({e})")
             poses = None
     if poses:
-        print(f"Cat: {poses}")
+        print(f"Panda: {poses}")
     cat_on = bool(poses)
 
     if args.still:
@@ -665,7 +666,7 @@ def main():
             if i in photos:
                 frame.alpha_composite(photos[i])
             if poses[i]:
-                c = avatar.Cat([poses[i]], CAT_W).image(poses[i])
+                c = avatar.Rig([poses[i]], CAT_W).image(poses[i])
                 frame.alpha_composite(c, (CAT_CX - c.width // 2, CAT_BOTTOM - c.height))
         frame.alpha_composite(draw_frame(theme, tag, brand, slides[i]["screen"], cap, i, len(slides),
                                          (i + 0.5) / len(slides), cover_for(i), photos.get(i), cat_on))

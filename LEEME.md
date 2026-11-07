@@ -70,25 +70,28 @@ python3 make_video.py guiones/ejemplo_es.json -o tiktok_es.mp4
 
 El diseño deja libre la franja derecha y la parte de abajo, que TikTok tapa con sus botones y la descripción.
 
-## El gato (avatar, v1.3)
+## El panda (avatar, v1.3)
 
-En algunos videos aparece "el gato" entre el titular y los subtítulos: mueve la boca con la voz,
-parpadea y cambia de pose en cada slide. Las fotos de Pixabay siguen saliendo detrás de él.
+En algunos videos aparece "el panda" (Jesús en caricatura) entre el titular y los subtítulos:
+mueve la boca con la voz, parpadea y cambia de pose en cada slide. Las fotos de Pixabay siguen
+saliendo detrás de él.
 
 - **Qué videos lo llevan:** se eligen al azar, pero siempre igual para el mismo archivo. En
-  `config.json`, `"gato_probabilidad": 50` es el porcentaje de videos con gato (0 lo apaga).
+  `config.json`, `"panda_probabilidad": 50` es el porcentaje de videos con panda (0 lo apaga).
   Nunca sale en los videos de libros.
-- **Forzarlo:** `"gato": true` o `"gato": false` arriba del guion.
-- **Pose por slide:** si el titular empieza con "1.", "2." o "3.", el gato cuenta con los dedos
+- **Forzarlo:** `"panda": true` o `"panda": false` arriba del guion.
+- **Pose por slide:** si el titular empieza con "1.", "2." o "3.", cuenta con los dedos
   (`uno`, `dos`, `tres`). Si no, se elige sola entre poses neutras: gancho (`piensa`, `sorpresa`,
   `saluda`), en medio (`explica`, `idea`, `lentes`, `senala`) y cierre (`pulgar`, `excelente`).
-  Las poses con opinión (`sarcasmo`, `duda`, `preocupado`, `aprobado`, `rechazo`) solo salen si
-  el guion las pide: `"gato": "rechazo"` en el slide. `"gato": false` en un slide lo oculta ahí.
-- **Imágenes:** `avatar/gato_<pose>.png`, 1254×1254 con fondo azul marino. Una pose nueva solo
-  necesita su archivo; nariz, boca y ojos se miden solos. Para revisarlas todas:
-  `python3 avatar.py --sheet hoja.png`.
+  Las poses con opinión solo salen si el guion las pide con `"panda": "<pose>"` en el slide:
+  `sarcasmo`, `duda`, `preocupado`, `aprobado`, `rechazo`, `cansado`, y las fijas (sin mover la
+  boca) `panico`, `fastidio`, `tierno` y `lengua`. `"panda": false` en un slide lo oculta ahí.
+- **Imágenes:** `avatar/panda_<pose>.png`, 1254×1254 con fondo azul marino. Una pose nueva solo
+  necesita su archivo: la nariz se busca comparándola con la de `panda_piensa.png`, y de ahí
+  salen la boca y los ojos. Si no la encuentra (ojos cerrados, boca abierta), la pose sale fija.
+  Para revisarlas todas: `python3 avatar.py --sheet hoja.png`.
 - Necesita `scipy` (`pip install scipy`). Si falta, o faltan las imágenes, el video sale igual
-  pero sin gato.
+  pero sin panda.
 
 ## Flujo diario (publish_daily.py)
 
