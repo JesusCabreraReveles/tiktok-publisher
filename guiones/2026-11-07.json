@@ -7,10 +7,10 @@
   "caption": "Si en tu equipo nadie recuerda por qué se tomó una decisión, te falta un ADR. Tres señales para notarlo a tiempo.",
   "hashtags": ["#arquitecturadesoftware", "#ingenieria", "#programacion", "#techtok"],
   "slides": [
-    {"screen": "¿Por qué hicimos esto así?", "say": "Si en tu equipo esa pregunta se repite cada mes, no tienes un problema de código. Te falta documentar decisiones. Tres señales."},
-    {"screen": "1. Nadie recuerda el porqué", "say": "Primera: la persona que decidió ya se fue, y con ella se fue la razón. Nadie se atreve a cambiar nada.", "photo": "team meeting office"},
-    {"screen": "2. Las discusiones se repiten", "say": "Segunda: cada trimestre vuelven a debatir lo mismo. Microservicios o monolito, otra vez desde cero."},
+    {"screen": "¿Por qué hicimos esto así?", "say": "Si en tu equipo esa pregunta se repite cada mes, no tienes un problema de código. Te falta documentar decisiones. Tres señales.", "photo": "confused developer code"},
+    {"screen": "1. Nadie recuerda el porqué", "say": "Primera: la persona que decidió ya se fue, y con ella se fue la razón. Nadie se atreve a cambiar nada.", "photo": "empty office desk"},
+    {"screen": "2. Las discusiones se repiten", "say": "Segunda: cada trimestre vuelven a debatir lo mismo. Microservicios o monolito, otra vez desde cero.", "photo": "team meeting whiteboard"},
     {"screen": "3. Los nuevos tardan semanas", "say": "Tercera: alguien nuevo tarda semanas en entender el sistema, porque el contexto vive en la cabeza de dos personas.", "photo": "programmer laptop night"},
-    {"screen": "Escribe un ADR de una página", "say": "La solución es simple: un ADR de una página por decisión. Contexto, opciones y por qué elegiste una. Sígueme para más."}
+    {"screen": "Escribe un ADR de una página", "say": "La solución es simple: un ADR de una página por decisión. Contexto, opciones y por qué elegiste una. Sígueme para más.", "photo": "notebook writing plan"}
   ]
 }
