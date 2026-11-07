@@ -48,8 +48,11 @@ def _search(query, key):
     os.makedirs(CACHE, exist_ok=True)
     cpath = os.path.join(CACHE, "q-" + hashlib.sha1(query.lower().encode()).hexdigest()[:16] + ".json")
     if os.path.exists(cpath) and time.time() - os.path.getmtime(cpath) < DAY:
-        with open(cpath, encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(cpath, encoding="utf-8") as f:
+                return json.load(f)
+        except ValueError:          # damaged cache (e.g. the Pi lost power): search again
+            os.remove(cpath)
     params = {"key": key, "q": query[:100], "image_type": "photo", "orientation": "vertical",
               "safesearch": "true", "per_page": 20, "order": "popular", "lang": "en"}
     req = urllib.request.Request(API + "?" + urllib.parse.urlencode(params), headers=UA)
@@ -58,9 +61,22 @@ def _search(query, key):
     hits = [{"id": h["id"], "url": h.get("largeImageURL") or h.get("webformatURL"),
              "w": h.get("imageWidth", 0), "h": h.get("imageHeight", 0)}
             for h in data.get("hits", []) if h.get("largeImageURL") or h.get("webformatURL")]
-    with open(cpath, "w", encoding="utf-8") as f:
+    with open(cpath + ".part", "w", encoding="utf-8") as f:   # atomic write
         json.dump(hits, f)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(cpath + ".part", cpath)
     return hits
+
+
+def _image_ok(path):
+    try:
+        from PIL import Image
+        with Image.open(path) as im:
+            im.verify()
+        return True
+    except Exception:
+        return False
 
 
 def get_photo(query, seed=0):
@@ -79,11 +95,18 @@ def get_photo(query, seed=0):
             return None
         hit = hits[seed % min(len(hits), 5)]
         path = os.path.join(CACHE, f"img-{hit['id']}.jpg")
+        if os.path.exists(path) and not _image_ok(path):   # damaged download: get it again
+            os.remove(path)
         if not os.path.exists(path):
             req = urllib.request.Request(hit["url"], headers=UA)
             with urllib.request.urlopen(req, timeout=30) as r, open(path + ".part", "wb") as f:
                 f.write(r.read())
+                f.flush()
+                os.fsync(f.fileno())
             os.replace(path + ".part", path)
+            if not _image_ok(path):
+                os.remove(path)
+                raise ValueError("downloaded file is not a valid image")
         print(f"  photo: '{query}' -> pixabay #{hit['id']}")
         return path
     except Exception as e:   # never break a video because of a photo
