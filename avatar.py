@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 """
-avatar.py - "el gato", the talking cartoon cat for the TikTok videos.
+avatar.py - "el panda", the talking cartoon panda (Jesús) for the TikTok videos.
 
 Each pose is a 1254x1254 PNG in avatar/ (navy background). Everything about a pose
 (nose, mouth line, eyes) is measured automatically from the picture, so a new pose only
-needs a new file named gato_<pose>.png.
+needs a new file named panda_<pose>.png. The nose is found by matching the nose of
+panda_piensa.png; a pose without a recognizable nose (e.g. eyes shut, open mouth) is used
+as a still picture: no talking, no blinking.
 
-Mouth: the cat's own smile stays as the upper lip; when he talks a jaw opening appears
+Mouth: the panda's own smile stays as the upper lip; when he talks a jaw opening appears
 under it (4 sizes + a rounded "o"), driven by the voice loudness and brightness.
-Blink: an eyelid of fur comes down over the eye white every few seconds.
+Blink: the eye is painted over with the colour around it and a closed-eye line is drawn.
 All poses are aligned by the nose, so the head never jumps when the pose changes.
 
   python3 avatar.py --sheet hoja.png      # every pose: closed, open, "o", blink
 
-make_video.py uses it (see "El gato" there). Needs numpy, pillow and scipy.
+make_video.py uses it (see "El panda" there). Needs numpy, pillow and scipy.
 """
 import argparse
 import glob
@@ -25,6 +27,7 @@ import wave
 import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 from scipy import ndimage
+from scipy.signal import fftconvolve
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 AVATAR_DIR = os.path.join(HERE, "avatar")
@@ -32,13 +35,19 @@ FPS = 30
 INK = (14, 12, 16)
 MOUTH_IN = (74, 24, 38)
 TONGUE = (236, 120, 132)
-REF_NOSE = (789, 537)          # nose of gato_piensa; every pose is moved so its nose lands here
+PREFIX = "panda"
+REF_POSE = "piensa"            # its nose is the template, and every pose is moved so its nose lands here
+NOSE_BOX = (730, 520, 830, 600)  # nose of the reference pose (x1, y1, x2, y2)
+REF_NOSE = (780, 560)
+NOSE_MIN_SCORE = 0.8           # below this the pose has no usable face: shown as a still
+STILL_POSES = {"lengua"}       # recognizable face, but talking would look wrong
 LEVELS = [0, 10, 20, 30]
 FADE_PX = 130                  # bottom of the torso fades out over this many pixels
 
-# poses picked on their own for each part of a video: only neutral ones, so the cat never
-# disagrees with what is being said. The rest (sarcasmo, duda, preocupado, aprobado, rechazo)
-# appear only when the script asks for them with "gato": "<pose>".
+# poses picked on their own for each part of a video: only neutral ones, so the panda never
+# disagrees with what is being said. The rest (sarcasmo, duda, preocupado, aprobado, rechazo,
+# cansado, lengua, panico, fastidio, tierno) appear only when the script asks for them:
+# "panda": "<pose>".
 ROLE_POSES = {
     "hook": ["piensa", "sorpresa", "saluda"],
     "middle": ["explica", "idea", "lentes", "senala"],
@@ -48,17 +57,34 @@ NUMBER_POSES = {1: "uno", 2: "dos", 3: "tres"}   # slides whose headline starts 
 
 
 # ---------------------------------------------------------------- calibration
-def _nose(arr):
-    R, G, B = arr[..., 0], arr[..., 1], arr[..., 2]
-    pink = (R > 225) & (G > 120) & (G < 175) & (B > 110) & (B < 170)
-    reg = np.zeros_like(pink)
-    reg[480:640, 560:960] = True
-    lab, n = ndimage.label(pink & reg)
-    if n == 0:
-        return REF_NOSE
-    sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
-    ys, xs = np.nonzero(lab == int(np.argmax(sizes)) + 1)
-    return int(round(xs.mean())), int(round(ys.mean()))
+_TEMPLATE = None
+
+
+def _nose_template():
+    global _TEMPLATE
+    if _TEMPLATE is None:
+        g = np.asarray(Image.open(os.path.join(AVATAR_DIR, f"{PREFIX}_{REF_POSE}.png")).convert("L")).astype(float)
+        x1, y1, x2, y2 = NOSE_BOX
+        t = g[y1:y2, x1:x2]
+        t = t - t.mean()
+        _TEMPLATE = (t, np.sqrt((t ** 2).sum()))
+    return _TEMPLATE
+
+
+def _nose(img):
+    """(x, y, score): centre of the nose, by normalized cross-correlation with the
+    reference nose, searched around the middle of the face."""
+    t, tn = _nose_template()
+    g = np.asarray(img.convert("L")).astype(float)
+    x0, y0, x1, y1 = 560, 430, 1000, 700
+    S = g[y0:y1, x0:x1]
+    num = fftconvolve(S, t[::-1, ::-1], mode="valid")
+    ones = np.ones_like(t)
+    s1 = fftconvolve(S, ones, mode="valid")
+    s2 = fftconvolve(S ** 2, ones, mode="valid")
+    ncc = num / (np.sqrt(np.maximum(s2 - s1 ** 2 / t.size, 1e-6)) * tn)
+    iy, ix = np.unravel_index(int(np.argmax(ncc)), ncc.shape)
+    return x0 + ix + t.shape[1] // 2, y0 + iy + t.shape[0] // 2, float(ncc.max())
 
 
 def _largest_white(arr, box):
@@ -71,6 +97,7 @@ def _largest_white(arr, box):
     if n == 0:
         return None
     sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
+    sizes[sizes > 40000] = 0                     # not an eye: too big
     k = int(np.argmax(sizes)) + 1
     if sizes[k - 1] < 600:
         return None
@@ -90,21 +117,36 @@ def _largest_white(arr, box):
     return [(int(x) + x1, int(y) + y1) for x, y in zip(xs, ys)]
 
 
-def _smile_bottom(arr, nose, half_span=95):
-    """{x: y just under the first dark line below the nose}, across the mouth."""
+def _smile(arr, nose):
+    """{x: y just under the mouth line} for the columns of the smile: the first thin dark
+    line under the nose (the beard is dark too, but thick, and is skipped)."""
     nx, ny = nose
-    y0, y1 = ny + 25, ny + 105
-    out = {}
-    for x in range(nx - half_span, nx + half_span):
-        dark = arr[y0:y1, x].sum(axis=1) < 180
+    y0, y1 = ny + 28, ny + 115
+    found = {}
+    for x in range(nx - 170, nx + 150):
+        dark = arr[y0:y1, x].sum(axis=1) < 200
         idx = np.nonzero(dark)[0]
         if not len(idx):
             continue
-        i = idx[0]
-        while i + 1 < len(dark) and dark[i + 1]:
-            i += 1
-        out[x] = y0 + i + 1
-    return out
+        i = j = idx[0]
+        while j + 1 < len(dark) and dark[j + 1]:
+            j += 1
+        if j - i <= 16 and j + 6 < len(dark) and not dark[j + 3:j + 7].any():
+            found[x] = y0 + j + 1
+    # keep the run of columns around the nose (small gaps allowed)
+    xs = sorted(found)
+    if not xs:
+        return {}
+    runs, cur = [], [xs[0]]
+    for x in xs[1:]:
+        if x - cur[-1] <= 4:
+            cur.append(x)
+        else:
+            runs.append(cur)
+            cur = [x]
+    runs.append(cur)
+    best = min(runs, key=lambda r: 0 if r[0] <= nx <= r[-1] else min(abs(r[0] - nx), abs(r[-1] - nx)) + 1000 - len(r))
+    return {x: found[x] for x in range(best[0], best[-1] + 1) if x in found}
 
 
 def _hull(points):
@@ -143,32 +185,38 @@ def cutout_mask(img):
 class Pose:
     def __init__(self, name, path=None):
         self.name = name
-        self.base = Image.open(path or os.path.join(AVATAR_DIR, f"gato_{name}.png")).convert("RGB")
+        self.base = Image.open(path or os.path.join(AVATAR_DIR, f"{PREFIX}_{name}.png")).convert("RGB")
         arr = np.asarray(self.base).astype(int)
-        self.nose = _nose(arr)
-        self.offset = (self.nose[0] - REF_NOSE[0], self.nose[1] - REF_NOSE[1])
-        self.smile = _smile_bottom(arr, self.nose)
-        nx, ny = self.nose
-        self.eyes = [e for e in (_largest_white(arr, (nx - 320, ny - 170, nx - 20, ny + 40)),
-                                 _largest_white(arr, (nx - 20, ny - 180, nx + 210, ny + 25))) if e]
+        nx, ny, score = _nose(self.base)
+        self.animated = score >= NOSE_MIN_SCORE and name not in STILL_POSES
+        if score < NOSE_MIN_SCORE:
+            nx, ny = REF_NOSE
+        self.nose = (nx, ny)
+        self.offset = (nx - REF_NOSE[0], ny - REF_NOSE[1])
+        self.smile = _smile(arr, self.nose) if self.animated else {}
+        noseless = arr.copy()
+        noseless[ny - 40:ny + 40, nx - 65:nx + 65] = 0      # the nose shine is white too
+        self.eyes = [e for e in (_largest_white(noseless, (nx - 320, ny - 190, nx - 20, ny + 10)),
+                                 _largest_white(noseless, (nx - 20, ny - 200, nx + 210, ny))) if e] if self.animated else []
         self.mask = cutout_mask(self.base)
         self._blink = None
 
     # ---- mouth
     def jaw(self, open_px, rounded=False, img=None):
         img = img or self.base
-        if open_px <= 0:
-            return img
-        dx, dy = self.offset
         sb = self.smile
+        if open_px <= 0 or len(sb) < 20:
+            return img
+        xs_all = sorted(sb)
+        x_lo, x_hi = xs_all[0], xs_all[-1]
+        c = (x_lo + x_hi) / 2
+        half = (x_hi - x_lo) * (0.17 if rounded else 0.30)     # the jaw opens in the middle
+        xa, xb = c - half, c + half
         S = 4
-        OX, OY, OW, OH = 620 + dx, 540 + dy, 340, 160
+        OX, OY = int(xa) - 40, min(sb[x] for x in xs_all) - 30
+        OW, OH = int(xb - xa) + 80, max(sb[x] for x in xs_all) - OY + open_px + 40
         big = img.crop((OX, OY, OX + OW, OY + OH)).convert("RGBA").resize((OW * S, OH * S), Image.LANCZOS)
         d = ImageDraw.Draw(big)
-        xa, xb = 735 + dx, 857 + dx
-        if rounded:
-            c = (xa + xb) / 2 + 2
-            xa, xb = c - 26, c + 26
         xs = [x for x in range(int(xa), int(xb) + 1) if x in sb]
         if len(xs) < 5:
             return img
@@ -243,14 +291,26 @@ class Pose:
         OX, OY, X2, Y2 = box
         patch = arr[OY:Y2, OX:X2].copy()
         tot = patch.sum(axis=2)
-        pinkish = (patch[..., 0] > 200) & (patch[..., 0] - patch[..., 1] > 55)
-        fur_like = (tot > 330) & (patch.min(axis=2) < 222) & ~pinkish
+        white = (patch.min(axis=2) > 228) & ((patch.max(axis=2) - patch.min(axis=2)) < 22)
+        fur_like = ~white & (tot > 45)          # around a panda eye: the dark patch
+        light = arr.sum(axis=2) > 560
+        lab, n = ndimage.label(light)
+        sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1)) if n else np.array([0])
+        face = lab == (int(np.argmax(sizes)) + 1)
         lines = []
         for pts in self.eyes:
-            m = self._eye_region(arr, pts)[OY:Y2, OX:X2]
-            fill = np.median(patch[ndimage.binary_dilation(m, iterations=25) & ~m & fur_like], axis=0)
-            # each row: blend from the fur on the left of the eye to the fur on the right
-            for y in np.nonzero(m.any(axis=1))[0]:
+            m = ndimage.binary_dilation(self._eye_region(arr, pts), iterations=2)[OY:Y2, OX:X2]
+            ring = ndimage.binary_dilation(m, iterations=25) & ~m & fur_like
+            fill = np.median(patch[ring], axis=0)
+            dark = ring & (tot < 300)
+            dark_patch = dark.sum() > 0.3 * ring.sum()     # panda: the eye sits in a dark patch
+            if dark_patch:
+                fill = np.median(patch[dark], axis=0)
+                # never paint over the face fur (the big light area) or the background
+                m = m & ~face[OY:Y2, OX:X2] & (np.asarray(self.mask)[OY:Y2, OX:X2] > 128)
+                patch[m] = fill
+            # otherwise each row blends from the fur on the left of the eye to the fur on the right
+            for y in (np.nonzero(m.any(axis=1))[0] if not dark_patch else []):
                 row = m[y]
                 xs = np.nonzero(row)[0]
                 a, b = xs.min(), xs.max()
@@ -263,25 +323,27 @@ class Pose:
                     patch[y, x] = lc * (1 - u) + rc * u
             sm = np.stack([ndimage.uniform_filter(patch[..., c], 9) for c in range(3)], axis=2)
             patch[m] = sm[m]
-            ys, xs = np.nonzero(m)
-            l, r, t, b = xs.min() + OX, xs.max() + OX, ys.min() + OY, ys.max() + OY
-            l, r = l + 8, r - 8
+            hx = [p[0] for p in pts]
+            hy = [p[1] for p in pts]
+            l, r, t, b = min(hx), max(hx), min(hy), max(hy)       # the eye white, not the mask
+            l, r = l + 4, r - 4
+            lash = (226, 214, 208) if dark_patch else INK    # light line on the dark patch
             yl = t + (b - t) * 0.55
-            lines.append([(l + (r - l) * u - OX, yl + (b - t) * 0.10 * math.sin(math.pi * u) - OY)
-                          for u in np.linspace(0, 1, 40)])
+            lines.append((lash, [(l + (r - l) * u - OX, yl + (b - t) * 0.10 * math.sin(math.pi * u) - OY)
+                                 for u in np.linspace(0, 1, 40)]))
         S = 4
         img = Image.fromarray(np.clip(patch, 0, 255).astype("uint8"))
         big = img.resize((img.width * S, img.height * S), Image.LANCZOS)
         d = ImageDraw.Draw(big)
-        for ln in lines:
+        for col, ln in lines:
             n = len(ln)
             for k in range(n - 1):
                 u = k / (n - 2)
-                w = 6 + 8 * math.sin(math.pi * u)          # thicker in the middle, tapered ends
+                w = 4 + 6 * math.sin(math.pi * u)          # thicker in the middle, tapered ends
                 d.line([(ln[k][0] * S, ln[k][1] * S), (ln[k + 1][0] * S, ln[k + 1][1] * S)],
-                       fill=INK, width=int(w * S))
+                       fill=col, width=int(w * S))
                 d.ellipse([(ln[k][0] - w / 2) * S, (ln[k][1] - w / 2) * S,
-                           (ln[k][0] + w / 2) * S, (ln[k][1] + w / 2) * S], fill=INK)
+                           (ln[k][0] + w / 2) * S, (ln[k][1] + w / 2) * S], fill=col)
         return big.resize(img.size, Image.LANCZOS)
 
 
@@ -322,7 +384,7 @@ def mouth_track(samples, sr, fps=FPS):
 
 
 # ---------------------------------------------------------------- rig
-class Cat:
+class Rig:
     """All requested poses aligned by the nose, cut out, sharing one crop box."""
 
     def __init__(self, poses, width):
@@ -344,6 +406,8 @@ class Cat:
         key = (pose, level, rounded, closed)
         if key not in self.cache:
             p = self.poses[pose]
+            if not p.animated:
+                level, closed = 0, False
             im = p.jaw(LEVELS[level], rounded)
             if closed:
                 im = p.blink(im)
@@ -360,11 +424,11 @@ class Cat:
 
 
 class Animator:
-    """Per-frame cat: mouth from the audio, blinks, a little sway, and a pop when the
+    """Per-frame panda: mouth from the audio, blinks, a little sway, and a pop when the
     pose changes. Call frame(n, pose) for n = 0, 1, 2, ..."""
 
-    def __init__(self, cat, samples, sr, seed=7):
-        self.cat = cat
+    def __init__(self, rig, samples, sr, seed=7):
+        self.rig = rig
         self.track, self.loud = mouth_track(samples, sr)
         self.rng = random.Random(seed)
         self.next_blink = self.rng.uniform(1.5, 3.5) * FPS
@@ -384,7 +448,7 @@ class Animator:
         level, rounded = self.track[min(n, len(self.track) - 1)]
         loud = self.loud[min(n, len(self.loud) - 1)]
         self.smooth = 0.85 * self.smooth + 0.15 * min(loud, 1.2)
-        img = self.cat.image(pose, level, rounded, closed)
+        img = self.rig.image(pose, level, rounded, closed)
         t = n / FPS
         ang = math.sin(t * 2 * math.pi * 0.3) * 1.0 + self.smooth * 1.2
         img = img.rotate(ang, resample=Image.BICUBIC)
@@ -414,20 +478,21 @@ def pick_poses(n_slides, rng, requested=None):
 
 
 def available_poses():
-    return sorted(os.path.basename(f)[5:-4] for f in glob.glob(os.path.join(AVATAR_DIR, "gato_*.png")))
+    n = len(PREFIX) + 1
+    return sorted(os.path.basename(f)[n:-4] for f in glob.glob(os.path.join(AVATAR_DIR, f"{PREFIX}_*.png")))
 
 
 # ---------------------------------------------------------------- CLI
 def sheet(path):
     names = available_poses()
-    cat = Cat(names, 250)
+    rig = Rig(names, 250)
     cols = 4
-    tile_w, tile_h = cat.size
+    tile_w, tile_h = rig.size
     out = Image.new("RGB", (cols * tile_w, len(names) * (tile_h + 24)), (40, 12, 44))
     d = ImageDraw.Draw(out)
     for r, n in enumerate(names):
         for c, args in enumerate([(0, False, False), (3, False, False), (2, True, False), (0, False, True)]):
-            im = cat.image(n, *args)
+            im = rig.image(n, *args)
             out.paste(im, (c * tile_w, r * (tile_h + 24) + 24), im)
         d.text((6, r * (tile_h + 24) + 4), f"{n}  (cerrada / abierta / o / parpadeo)", fill="white")
     out.save(path)
