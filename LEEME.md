@@ -62,6 +62,9 @@ python3 make_video.py guiones/ejemplo_es.json -o tiktok_es.mp4
 - `voice` (opcional). Inglés: `am_michael`, `am_adam`, `am_eric`, `bm_george` (británico), `af_heart`, `af_bella`…
   Español: `em_alex` (hombre), `ef_dora` (mujer).
 - `caption` y `hashtags`: la descripción del post en TikTok.
+- La voz en español usa acento latinoamericano (`es-419`). Los nombres en inglés que lee mal
+  se corrigen en `PRONUNCIATION` de `make_video.py` (por ejemplo "Hong Kong" se lee "Jong Kong");
+  los subtítulos siguen con la ortografía real.
 - Recomendado: 4 a 6 slides, 20 a 45 segundos en total. El primer slide es el gancho.
 - Hashtags: de 3 a 5, uno amplio (`#ai`, `#tech`), dos del tema del día y uno de comunidad (`#techtok`).
 
@@ -76,10 +79,11 @@ parpadea y cambia de pose en cada slide. Las fotos de Pixabay siguen saliendo de
   `config.json`, `"gato_probabilidad": 50` es el porcentaje de videos con gato (0 lo apaga).
   Nunca sale en los videos de libros.
 - **Forzarlo:** `"gato": true` o `"gato": false` arriba del guion.
-- **Pose por slide (opcional):** `"gato": "idea"` en un slide. Si no se pide, se elige sola:
-  gancho (`piensa`, `sorpresa`, `sarcasmo`, `saluda`), en medio (`explica`, `idea`, `lentes`,
-  `senala`, `duda`, `preocupado`, `aprobado`, `rechazo`) y cierre (`pulgar`, `excelente`).
-  Para listas numeradas están `uno`, `dos` y `tres`. `"gato": false` en un slide lo oculta ahí.
+- **Pose por slide:** si el titular empieza con "1.", "2." o "3.", el gato cuenta con los dedos
+  (`uno`, `dos`, `tres`). Si no, se elige sola entre poses neutras: gancho (`piensa`, `sorpresa`,
+  `saluda`), en medio (`explica`, `idea`, `lentes`, `senala`) y cierre (`pulgar`, `excelente`).
+  Las poses con opinión (`sarcasmo`, `duda`, `preocupado`, `aprobado`, `rechazo`) solo salen si
+  el guion las pide: `"gato": "rechazo"` en el slide. `"gato": false` en un slide lo oculta ahí.
 - **Imágenes:** `avatar/gato_<pose>.png`, 1254×1254 con fondo azul marino. Una pose nueva solo
   necesita su archivo; nariz, boca y ojos se miden solos. Para revisarlas todas:
   `python3 avatar.py --sheet hoja.png`.

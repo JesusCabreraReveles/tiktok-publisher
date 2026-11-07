@@ -74,7 +74,7 @@ FPS = 30
 GAP = 0.35            # silence between slides (seconds)
 WORDS_PER_CAPTION = 4
 DEFAULT_VOICE = {"en": "am_michael", "es": "em_alex"}
-KOKORO_LANG = {"en": "en-us", "es": "es"}
+KOKORO_LANG = {"en": "en-us", "es": "es-419"}   # es-419: Latin American (no Spanish "z")
 PAN = 220             # how many pixels the background drifts over the whole video
 
 WHITE = (255, 255, 255)
@@ -175,6 +175,28 @@ FONT_SEMI = find_font(["Inter-SemiBold.otf", "Inter-SemiBold.ttf", "DejaVuSans.t
 
 
 # ---------- voice ----------
+# How the Spanish voice should say some names. Only the voice uses this; the captions keep the
+# real spelling. Add new ones here when a name comes out wrong.
+PRONUNCIATION = {
+    "es": {
+        "Hong Kong": "Jong Kong", "Reuters": "Róiters", "GitHub": "Guit Jab", "Gemini": "Yémini",
+        "Hugging Face": "Jáguin Feis", "YouTube": "Yutub", "Harvard": "Járvard",
+        "Hollywood": "Jóliwud", "Google": "Gúgol", "Bloomberg": "Blúmberg", "Apple": "Ápol",
+        "Huawei": "Juawéi", "Wall Street": "Wol Strit", "Silicon Valley": "Sílicon Váli",
+        "OpenAI": "Open ei ái", "ChatGPT": "Chat yi pi tí", "Nvidia": "Envídia",
+        "LinkedIn": "Línkedin", "Anthropic": "Antrópic", "startup": "estártap",
+        "startups": "estártaps", "software": "sóftuer", "hardware": "járduer",
+        "data center": "data cénter", "cloud": "cláud",
+    },
+}
+
+
+def for_voice(text, lang):
+    for word, said in PRONUNCIATION.get(lang, {}).items():
+        text = re.sub(rf"(?<!\w){re.escape(word)}(?!\w)", said, text, flags=re.IGNORECASE)
+    return text
+
+
 def tts(slides, lang, voice, workdir):
     import soundfile as sf
     from kokoro_onnx import Kokoro
@@ -184,7 +206,7 @@ def tts(slides, lang, voice, workdir):
     k = Kokoro(model, voices)
     out = []
     for i, s in enumerate(slides):
-        audio, sr = k.create(s["say"], voice=voice, speed=1.05, lang=KOKORO_LANG[lang])
+        audio, sr = k.create(for_voice(s["say"], lang), voice=voice, speed=1.05, lang=KOKORO_LANG[lang])
         path = os.path.join(workdir, f"a{i:02d}.wav")
         sf.write(path, audio, sr)
         out.append((path, len(audio) / sr, audio, sr))
@@ -391,6 +413,10 @@ def cat_poses(sc, seed):
     import avatar
     slides = sc["slides"]
     req = [s.get("gato") if isinstance(s.get("gato"), str) else None for s in slides]
+    for i, s in enumerate(slides):           # "1. ...", "2) ..." headlines count with the fingers
+        m = re.match(r"\s*([1-3])\s*[.):\-]", s.get("screen", ""))
+        if m and not req[i]:
+            req[i] = avatar.NUMBER_POSES[int(m.group(1))]
     have = set(avatar.available_poses())
     req = [r if r in have else None for r in req]
     poses = avatar.pick_poses(len(slides), random.Random(seed), req)
