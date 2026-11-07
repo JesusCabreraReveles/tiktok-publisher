@@ -27,6 +27,14 @@ and put behind the text; a small "Foto: Pixabay" credit is shown. A top-level "p
 for slides without their own. Slides with the big book cover never get a photo. If there is no
 key or no result, the slide keeps the normal background.
 
+The panda avatar (v1.3, avatar.py): a talking cartoon panda (Jesús) under the headline, one pose
+per slide (hook / middle / close; "1." "2." "3." headlines count with the fingers), mouth moving
+with the voice. It is added to a share of the videos picked at random but repeatable from the
+file name ("panda_probabilidad" in config.json, default 50 = half of them). Never in book videos.
+"panda": true / false at the top of the script forces it on or off. A slide can ask for a pose
+with "panda": "<pose>" (see avatar.py, e.g. "idea", "duda", "rechazo") or hide it with
+"panda": false. Photos still show behind the panda.
+
 With "cover", by default slide 1 shows the cover big, alone (the book is the first thing people
 see, and it makes the thumbnail), the middle slides show a medium cover above a smaller
 headline, and the last slide shows the cover big again. A slide can override it with
@@ -45,6 +53,7 @@ Look of each video (v1.1):
 """
 import argparse
 import datetime as dt
+import hashlib
 import json
 import math
 import os
@@ -66,12 +75,18 @@ FPS = 30
 GAP = 0.35            # silence between slides (seconds)
 WORDS_PER_CAPTION = 4
 DEFAULT_VOICE = {"en": "am_michael", "es": "em_alex"}
-KOKORO_LANG = {"en": "en-us", "es": "es"}
+KOKORO_LANG = {"en": "en-us", "es": "es-419"}   # es-419: Latin American (no Spanish "z")
 PAN = 220             # how many pixels the background drifts over the whole video
 
 WHITE = (255, 255, 255)
 MUTED = (170, 176, 200)
 DARK = (14, 14, 22)
+
+# the panda sits between the headline and the captions
+CAT_W = 380           # width of a ~1000 px body (all poses use the same scale)
+CAT_CX = 500          # centre of the safe area
+CAT_BOTTOM = 1240     # bottom fades out behind the captions
+CAT_HEADLINE_H = 380  # headline gets less room when the panda is on
 
 # TikTok covers the right edge and the bottom with its own buttons/caption.
 SAFE_LEFT, SAFE_RIGHT = 90, W - 170
@@ -161,6 +176,28 @@ FONT_SEMI = find_font(["Inter-SemiBold.otf", "Inter-SemiBold.ttf", "DejaVuSans.t
 
 
 # ---------- voice ----------
+# How the Spanish voice should say some names. Only the voice uses this; the captions keep the
+# real spelling. Add new ones here when a name comes out wrong.
+PRONUNCIATION = {
+    "es": {
+        "Hong Kong": "Jong Kong", "Reuters": "Róiters", "GitHub": "Guit Jab", "Gemini": "Yémini",
+        "Hugging Face": "Jáguin Feis", "YouTube": "Yutub", "Harvard": "Járvard",
+        "Hollywood": "Jóliwud", "Google": "Gúgol", "Bloomberg": "Blúmberg", "Apple": "Ápol",
+        "Huawei": "Juawéi", "Wall Street": "Wol Strit", "Silicon Valley": "Sílicon Váli",
+        "OpenAI": "Open ei ái", "ChatGPT": "Chat yi pi tí", "Nvidia": "Envídia",
+        "LinkedIn": "Línkedin", "Anthropic": "Antrópic", "startup": "estártap",
+        "startups": "estártaps", "software": "sóftuer", "hardware": "járduer",
+        "data center": "data cénter", "cloud": "cláud",
+    },
+}
+
+
+def for_voice(text, lang):
+    for word, said in PRONUNCIATION.get(lang, {}).items():
+        text = re.sub(rf"(?<!\w){re.escape(word)}(?!\w)", said, text, flags=re.IGNORECASE)
+    return text
+
+
 def tts(slides, lang, voice, workdir):
     import soundfile as sf
     from kokoro_onnx import Kokoro
@@ -170,7 +207,7 @@ def tts(slides, lang, voice, workdir):
     k = Kokoro(model, voices)
     out = []
     for i, s in enumerate(slides):
-        audio, sr = k.create(s["say"], voice=voice, speed=1.05, lang=KOKORO_LANG[lang])
+        audio, sr = k.create(for_voice(s["say"], lang), voice=voice, speed=1.05, lang=KOKORO_LANG[lang])
         path = os.path.join(workdir, f"a{i:02d}.wav")
         sf.write(path, audio, sr)
         out.append((path, len(audio) / sr, audio, sr))
@@ -352,6 +389,42 @@ def cover_modes(sc):
     return modes
 
 
+def load_config():
+    try:
+        with open(os.path.join(HERE, "config.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def wants_cat(script_path, sc, theme):
+    """True if this video gets the panda. Books never; "panda" in the script wins; otherwise a
+    repeatable coin toss from the file name."""
+    if theme == "book" or sc.get("cover"):
+        return False
+    if isinstance(sc.get("panda"), bool):
+        return sc["panda"]
+    prob = load_config().get("panda_probabilidad", 50)
+    h = int(hashlib.sha1(os.path.basename(script_path).encode()).hexdigest(), 16)
+    return h % 100 < prob
+
+
+def cat_poses(sc, seed):
+    """Pose name (or None = no panda) for each slide."""
+    import avatar
+    slides = sc["slides"]
+    req = [s.get("panda") if isinstance(s.get("panda"), str) else None for s in slides]
+    for i, s in enumerate(slides):           # "1. ...", "2) ..." headlines count with the fingers
+        m = re.match(r"\s*([1-3])\s*[.):\-]", s.get("screen", ""))
+        if m and not req[i]:
+            req[i] = avatar.NUMBER_POSES[int(m.group(1))]
+    have = set(avatar.available_poses())
+    req = [r if r in have else None for r in req]
+    poses = avatar.pick_poses(len(slides), random.Random(seed), req)
+    poses = [p if p in have else (sorted(have)[0] if have else None) for p in poses]
+    return [None if s.get("panda") is False else p for s, p in zip(slides, poses)]
+
+
 def photo_layer(path):
     """Background photo for a slide: cover-cropped to the frame, darkened so the white text
     stays readable, and slightly transparent so the moving pattern still shows a little."""
@@ -374,11 +447,14 @@ def photo_layer(path):
     return out
 
 
-def draw_frame(theme, tag, brand, headline, caption, idx, total, progress, cover=None, photo=None):
-    """Transparent layer with all the text; it goes on top of the moving background."""
+def draw_frame(theme, tag, brand, headline, caption, idx, total, progress, cover=None, photo=None,
+               cat=False):
+    """Transparent layer with all the text; it goes on top of the moving background.
+    cat=True: smaller headline (room for the panda), and the photo is not drawn here because it
+    goes in its own layer under the panda (only the credit is written)."""
     t = THEMES[theme]
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    if photo is not None:
+    if photo is not None and not cat:
         img.alpha_composite(photo)
     d = ImageDraw.Draw(img)
 
@@ -412,7 +488,7 @@ def draw_frame(theme, tag, brand, headline, caption, idx, total, progress, cover
             y += lh
     else:
         # headline
-        fh, lines, lh = fit_headline(d, headline, max_w - 44, 620)  # text starts 44 px in
+        fh, lines, lh = fit_headline(d, headline, max_w - 44, CAT_HEADLINE_H if cat else 620)
         y = 420
         d.rectangle((SAFE_LEFT, y + 6, SAFE_LEFT + 12, y + lh * len(lines) - 14), fill=t["accent2"])
         for ln in lines:
@@ -456,6 +532,76 @@ def pan_expr(seed, dur):
     return x, y
 
 
+def encode_with_cat(work, bg_path, text_list, audio_path, px, py, enc, photos, poses, spans, samples,
+                    sr, seed):
+    """Layers, bottom to top: moving background, slide photo, talking panda, text.
+    The panda is drawn frame by frame in Python and piped to ffmpeg."""
+    import avatar
+
+    # photo layer: one image per slide (transparent when the slide has no photo)
+    empty = os.path.join(work, "nophoto.png")
+    Image.new("RGBA", (W, H), (0, 0, 0, 0)).save(empty)
+    lines = []
+    for i, d in enumerate(spans):
+        p = empty
+        if i in photos:
+            p = os.path.join(work, f"photo{i}.png")
+            photos[i].save(p)
+        lines += [f"file '{p}'", f"duration {d:.3f}"]
+    lines.append(f"file '{p}'")
+    photo_list = os.path.join(work, "photos.txt")
+    with open(photo_list, "w") as f:
+        f.write("\n".join(lines))
+
+    cat = avatar.Rig([p for p in poses if p], CAT_W)
+    anim = avatar.Animator(cat, samples, sr, seed=seed)
+    pad = 40
+    cw, ch = cat.size[0] + 2 * pad, cat.size[1] + 2 * pad
+    cx, cy = CAT_CX - cw // 2, CAT_BOTTOM - cat.size[1] - pad
+    starts = np.cumsum([0] + spans[:-1])
+    n_frames = int(sum(spans) * FPS) + 2
+
+    filt = (
+        f"[0:v]crop={W}:{H}:x='{px}':y='{py}'[bg];"
+        f"[1:v]fps={FPS},format=rgba[ph];"
+        f"[2:v]fps={FPS},format=rgba[fg];"
+        f"[3:v]format=rgba[cat];"
+        f"[bg][ph]overlay=0:0:shortest=1[b1];"
+        f"[b1][cat]overlay={cx}:{cy}:shortest=1[b2];"
+        f"[b2][fg]overlay=0:0:shortest=1,format=yuv420p[v]"
+    )
+    cmd = [
+        "ffmpeg", "-y", "-loglevel", "error",
+        "-loop", "1", "-framerate", str(FPS), "-i", bg_path,
+        "-f", "concat", "-safe", "0", "-i", photo_list,
+        "-f", "concat", "-safe", "0", "-i", text_list,
+        "-f", "rawvideo", "-pix_fmt", "rgba", "-s", f"{cw}x{ch}", "-r", str(FPS), "-i", "-",
+        "-i", audio_path,
+        "-filter_complex", filt,
+        "-map", "[v]", "-map", "4:a",
+    ] + enc
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+    blank = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+    try:
+        for n in range(n_frames):
+            i = int(np.searchsorted(starts, n / FPS, side="right")) - 1
+            pose = poses[min(max(i, 0), len(poses) - 1)]
+            canvas = blank.copy()
+            if pose:
+                img, dy = anim.frame(n, pose)
+                canvas.alpha_composite(img, ((cw - img.width) // 2, max(0, int(pad + cat.size[1] - img.height + dy))))
+            proc.stdin.write(canvas.tobytes())
+    except BrokenPipeError:
+        pass                        # ffmpeg already has everything it needs (-shortest)
+    finally:
+        try:
+            proc.stdin.close()
+        except BrokenPipeError:
+            pass
+    if proc.wait() != 0:
+        raise subprocess.CalledProcessError(proc.returncode, "ffmpeg")
+
+
 # ---------- main ----------
 def main():
     ap = argparse.ArgumentParser()
@@ -496,14 +642,34 @@ def main():
         if layer is not None:
             photos[i] = layer
 
+    poses = None
+    if wants_cat(args.script, sc, theme):
+        try:
+            poses = cat_poses(sc, seed)
+            if not any(poses):
+                poses = None
+        except Exception as e:          # missing scipy, missing images...: video without cat
+            print(f"  warning: no panda this time ({e})")
+            poses = None
+    if poses:
+        print(f"Panda: {poses}")
+    cat_on = bool(poses)
+
     if args.still:
         bg = background(theme, pattern, seed)
         cx, cy = PAN // 2, PAN // 2
         frame = bg.crop((cx, cy, cx + W, cy + H)).convert("RGBA")
         i = min(max(args.slide, 1), len(slides)) - 1
         cap = caption_chunks(slides[i]["say"], 1)[0][0]
+        if cat_on:
+            import avatar
+            if i in photos:
+                frame.alpha_composite(photos[i])
+            if poses[i]:
+                c = avatar.Rig([poses[i]], CAT_W).image(poses[i])
+                frame.alpha_composite(c, (CAT_CX - c.width // 2, CAT_BOTTOM - c.height))
         frame.alpha_composite(draw_frame(theme, tag, brand, slides[i]["screen"], cap, i, len(slides),
-                                         (i + 0.5) / len(slides), cover_for(i), photos.get(i)))
+                                         (i + 0.5) / len(slides), cover_for(i), photos.get(i), cat_on))
         frame.convert("RGB").save(args.still)
         print(f"Done: {args.still}")
         return
@@ -538,7 +704,7 @@ def main():
             for cap, cdur in chunks:
                 t += cdur
                 img = draw_frame(theme, tag, brand, s["screen"], cap, i, len(slides), t / total_dur,
-                                 cover_for(i), photos.get(i))
+                                 cover_for(i), photos.get(i), cat_on)
                 p = os.path.join(work, f"f{n:04d}.png")
                 img.save(p)
                 concat_lines += [f"file '{p}'", f"duration {cdur:.3f}"]
@@ -550,24 +716,27 @@ def main():
 
         print("3) Encoding video...")
         px, py = pan_expr(seed, total_dur)
-        filt = (
-            f"[0:v]crop={W}:{H}:x='{px}':y='{py}'[bg];"
-            f"[1:v]fps={FPS},format=rgba[fg];"
-            f"[bg][fg]overlay=0:0:shortest=1,format=yuv420p[v]"
-        )
-        cmd = [
-            "ffmpeg", "-y", "-loglevel", "error",
-            "-loop", "1", "-framerate", str(FPS), "-i", bg_path,
-            "-f", "concat", "-safe", "0", "-i", lst,
-            "-i", audio_path,
-            "-filter_complex", filt,
-            "-map", "[v]", "-map", "2:a",
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
-            "-c:a", "aac", "-b:a", "160k",
-            "-t", f"{total_dur:.3f}", "-shortest", "-movflags", "+faststart",
-            args.out,
-        ]
-        subprocess.run(cmd, check=True)
+        enc = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
+               "-c:a", "aac", "-b:a", "160k",
+               "-t", f"{total_dur:.3f}", "-shortest", "-movflags", "+faststart", args.out]
+        if not cat_on:
+            filt = (
+                f"[0:v]crop={W}:{H}:x='{px}':y='{py}'[bg];"
+                f"[1:v]fps={FPS},format=rgba[fg];"
+                f"[bg][fg]overlay=0:0:shortest=1,format=yuv420p[v]"
+            )
+            cmd = [
+                "ffmpeg", "-y", "-loglevel", "error",
+                "-loop", "1", "-framerate", str(FPS), "-i", bg_path,
+                "-f", "concat", "-safe", "0", "-i", lst,
+                "-i", audio_path,
+                "-filter_complex", filt,
+                "-map", "[v]", "-map", "2:a",
+            ] + enc
+            subprocess.run(cmd, check=True)
+        else:
+            encode_with_cat(work, bg_path, lst, audio_path, px, py, enc, photos, poses,
+                            [d + GAP for _, d, _, _ in audios], full, sr, seed)
         print(f"Done: {args.out} ({total_dur:.1f}s, {theme}/{pattern})")
     finally:
         shutil.rmtree(work, ignore_errors=True)

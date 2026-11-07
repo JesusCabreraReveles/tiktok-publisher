@@ -23,7 +23,7 @@ cd ~/tiktok-publisher
 
 python3 -m venv .venv
 source .venv/bin/activate
-pip install kokoro-onnx soundfile pillow numpy
+pip install kokoro-onnx soundfile pillow numpy scipy
 
 mkdir -p voices && cd voices
 wget https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
@@ -62,10 +62,36 @@ python3 make_video.py guiones/ejemplo_es.json -o tiktok_es.mp4
 - `voice` (opcional). Inglés: `am_michael`, `am_adam`, `am_eric`, `bm_george` (británico), `af_heart`, `af_bella`…
   Español: `em_alex` (hombre), `ef_dora` (mujer).
 - `caption` y `hashtags`: la descripción del post en TikTok.
+- La voz en español usa acento latinoamericano (`es-419`). Los nombres en inglés que lee mal
+  se corrigen en `PRONUNCIATION` de `make_video.py` (por ejemplo "Hong Kong" se lee "Jong Kong");
+  los subtítulos siguen con la ortografía real.
 - Recomendado: 4 a 6 slides, 20 a 45 segundos en total. El primer slide es el gancho.
 - Hashtags: de 3 a 5, uno amplio (`#ai`, `#tech`), dos del tema del día y uno de comunidad (`#techtok`).
 
 El diseño deja libre la franja derecha y la parte de abajo, que TikTok tapa con sus botones y la descripción.
+
+## El panda (avatar, v1.3)
+
+En algunos videos aparece "el panda" (Jesús en caricatura) entre el titular y los subtítulos:
+mueve la boca con la voz, parpadea y cambia de pose en cada slide. Las fotos de Pixabay siguen
+saliendo detrás de él.
+
+- **Qué videos lo llevan:** se eligen al azar, pero siempre igual para el mismo archivo. En
+  `config.json`, `"panda_probabilidad": 50` es el porcentaje de videos con panda (0 lo apaga).
+  Nunca sale en los videos de libros.
+- **Forzarlo:** `"panda": true` o `"panda": false` arriba del guion.
+- **Pose por slide:** si el titular empieza con "1.", "2." o "3.", cuenta con los dedos
+  (`uno`, `dos`, `tres`). Si no, se elige sola entre poses neutras: gancho (`piensa`, `sorpresa`,
+  `saluda`), en medio (`explica`, `idea`, `lentes`, `senala`) y cierre (`pulgar`, `excelente`).
+  Las poses con opinión solo salen si el guion las pide con `"panda": "<pose>"` en el slide:
+  `sarcasmo`, `duda`, `preocupado`, `aprobado`, `rechazo`, `cansado`, y las fijas (sin mover la
+  boca) `panico`, `fastidio`, `tierno` y `lengua`. `"panda": false` en un slide lo oculta ahí.
+- **Imágenes:** `avatar/panda_<pose>.png`, 1254×1254 con fondo azul marino. Una pose nueva solo
+  necesita su archivo: la nariz se busca comparándola con la de `panda_piensa.png`, y de ahí
+  salen la boca y los ojos. Si no la encuentra (ojos cerrados, boca abierta), la pose sale fija.
+  Para revisarlas todas: `python3 avatar.py --sheet hoja.png`.
+- Necesita `scipy` (`pip install scipy`). Si falta, o faltan las imágenes, el video sale igual
+  pero sin panda.
 
 ## Flujo diario (publish_daily.py)
 
