@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "NEXUS · SÁBADO",
+  "brand": "geminislabs.com",
+  "caption": "Una alerta solo vale si te hace actuar. Así pensamos las alertas de Nexus. Búscalo en geminislabs.com",
+  "hashtags": ["#gps", "#flotillas", "#tecnologia", "#techtok"],
+  "slides": [
+    {"screen": "Demasiadas alertas no sirven", "say": "¿Tu rastreador te manda cincuenta avisos al día? Entonces ya no lees ninguno."},
+    {"screen": "Solo importan pocas", "say": "Una alerta solo vale la pena si alguien tiene que actuar. Y en rastreo, esa lista es corta."},
+    {"screen": "Pérdida de energía inesperada", "say": "Si el dispositivo pierde energía de repente, Nexus te avisa con la última ubicación y la hora exacta."},
+    {"screen": "Geocercas hexagonales, menos falsas alarmas", "say": "Y sus geocercas son hexagonales: la zona se ajusta al área real y te llegan menos falsas alarmas."},
+    {"screen": "Nexus de Geminis Labs", "say": "Conoce Nexus en geminislabs punto com. Sígueme para más."}
+  ]
+}
