@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "CLASH OF EGOS · DOMINGO",
+  "brand": "clashofegos.lol",
+  "caption": "Un juego satírico donde ejecutivos pagan por el trono. Empieza con un dólar. clashofegos.lol",
+  "hashtags": ["#humor", "#emprendimiento", "#liderazgo", "#techtok"],
+  "slides": [
+    {"screen": "¿Pagarías por ser el número uno?", "say": "¿Cuánto pagarías por estar hasta arriba de un ranking de ejecutivos? Hice un juego para averiguarlo, y es pura sátira."},
+    {"screen": "Todo empieza con un dólar", "say": "La primera postura cuesta un dólar. Para quitarle el trono a alguien, tienes que pagar al menos un dólar más."},
+    {"screen": "Cada asalto alimenta la bóveda", "say": "Cada dólar va a una bóveda común. Quien tenga el trono al último segundo de la temporada se lleva la corona."},
+    {"screen": "Sin reembolsos por soberbia", "say": "Si te destronan cinco segundos después de pagar, tu dinero ya se quedó en la bóveda. Así funciona el ego."},
+    {"screen": "El trono de México está vacío", "say": "Ahora mismo nadie lo ha reclamado. Juega en clash of egos punto lol. Sígueme para más."}
+  ]
+}
