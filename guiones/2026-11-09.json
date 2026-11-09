@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "LIDERAZGO · LUNES",
+  "brand": "geminislabs.com",
+  "caption": "Si todo es prioridad, nada lo es. Tres errores al fijar prioridades y cómo corregirlos esta semana.",
+  "hashtags": ["#tecnologia", "#liderazgo", "#emprendimiento", "#techtok"],
+  "slides": [
+    {"screen": "Si todo es prioridad, nada lo es", "say": "Si tu equipo tiene diez prioridades, en realidad no tiene ninguna. Estos son tres errores que veo seguido.", "photo": "cluttered desk papers"},
+    {"screen": "1. Demasiadas prioridades a la vez", "say": "Error uno: pedir todo al mismo tiempo. Elige máximo tres, y ordénalas. La número uno gana cuando chocan.", "photo": "juggling balls hands"},
+    {"screen": "2. Cambiarlas cada semana", "say": "Error dos: cambiar de rumbo cada lunes. Tu equipo deja de creerte y espera al siguiente cambio antes de avanzar.", "photo": "road signs crossroads"},
+    {"screen": "3. No decir qué se deja", "say": "Error tres: nunca decir qué no se va a hacer. Lo que dejas fuera es tan importante como lo que eliges.", "photo": "empty chair office"},
+    {"screen": "Menos prioridades, más avance", "say": "Hoy mismo escribe tus tres prioridades y una cosa que vas a dejar. Compártelas con tu equipo. Sígueme para más.", "photo": "team meeting whiteboard"}
+  ]
+}
