@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "IA · MARTES",
+  "brand": "geminislabs.com",
+  "caption": "En un estudio de Alibaba, el mejor agente de código completó solo 26.4% de tareas reales. Así evalúas la IA de verdad.",
+  "hashtags": ["#ia", "#programacion", "#negocios", "#techtok"],
+  "slides": [
+    {"screen": "Pasa el examen, ¿y el trabajo?", "say": "Un estudio de Alibaba probó agentes de código con tareas reales de usuarios. El mejor completó bien solo el veintiséis punto cuatro por ciento.", "photo": "student exam classroom"},
+    {"screen": "Mito: el benchmark dice la verdad", "say": "En pruebas viejas, modelos parecidos pasan del noventa y nueve por ciento. Pero esas pruebas no se parecen a tu negocio.", "photo": "laptop code screen"},
+    {"screen": "1. A medias no sirve", "say": "El mejor agente cumplió casi el setenta por ciento de los criterios, pero terminó pocas tareas completas. Lo incompleto también cuesta.", "photo": "checklist clipboard desk"},
+    {"screen": "2. Pruébalo con tus tareas", "say": "Antes de comprar, toma diez tareas reales de tu equipo y mide cuántas resuelve completas, sin ayuda.", "photo": "team meeting office"},
+    {"screen": "3. Siempre revisión humana", "say": "Usa al agente para avanzar rápido, pero que una persona revise antes de producción. Sígueme para más.", "photo": "engineer reviewing computer"}
+  ]
+}
