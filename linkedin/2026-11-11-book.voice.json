@@ -1,0 +1,8 @@
+{
+  "voice": "am_michael",
+  "segments": [
+    {"at": 0.5, "say": "Real-time telemetry looks simple on a whiteboard. Production disagrees."},
+    {"at": 5.4, "say": "My book: event contracts, state and time, resilient flows."},
+    {"at": 9.9, "say": "It's on Amazon. Search Jesús Cabrera Reveles."}
+  ]
+}

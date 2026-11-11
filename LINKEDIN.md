@@ -45,16 +45,45 @@ python3 render_diagram.py linkedin/prueba-outbox.html --still /tmp/cuadro.png --
   temporizadores de JavaScript**: el script pausa las animaciones y las mueve cuadro por
   cuadro, y los temporizadores no se pueden pausar.
 - Contar una historia en 2 pasos (problema → solución), 12 a 15 s, terminando con el
-  diagrama completo y una frase final. Sin voz: LinkedIn reproduce los videos en silencio.
+  diagrama completo y una frase final.
 - Colores del miércoles: verde + lima (los mismos que TikTok).
 - El texto del post va aparte, en `linkedin/<nombre>.txt`, en inglés y con el footer.
+
+## Sonido (desde el 11 nov 2026)
+
+Ningún video de LinkedIn sale mudo. `add_audio.py` le pone a cada video:
+
+1. **Voz en inglés** (Kokoro `am_michael`, el mismo motor que TikTok), si existe
+   `linkedin/<nombre>.voice.json` junto al `.html`:
+
+   ```json
+   {"voice": "am_michael",
+    "segments": [{"at": 0.4,  "say": "Naive retries amplify outages."},
+                 {"at": 6.5,  "say": "The fix: backoff, jitter, a retry budget, and a breaker."},
+                 {"at": 11.2, "say": "Retry less. Recover sooner."}]}
+   ```
+
+   `at` = segundo en que empieza la frase (problema → solución → frase final). Regla para que
+   la voz no se atrase: **unas 2 palabras por segundo** de espacio hasta la siguiente frase.
+   Si una frase empieza más de 0.5 s tarde, el log dice `WARNING: line N starts … late`.
+   Si la voz dura más que el video, se congela el último cuadro hasta que termina.
+2. **Música de fondo suave**, generada en la Pi (sin archivos ni derechos de autor). Baja
+   debajo de la voz y sola si no hay `.voice.json` o si falla la voz.
+
+Si hasta la música fallara, el video sale mudo (con aviso en el log) en vez de detenerse.
+Probar solo el audio sobre un video ya hecho:
+
+```bash
+python3 add_audio.py /tmp/prueba-outbox.mp4 -o /tmp/con-audio.mp4 --voice linkedin/2026-11-11.voice.json
+```
 
 ## Flujo diario (paso 2)
 
 1. La tarea de Claude guarda, para cada post con video:
-   - `linkedin/AAAA-MM-DD.html` (diagrama) + `linkedin/AAAA-MM-DD.txt` (texto del post), y
+   - `linkedin/AAAA-MM-DD.html` (diagrama) + `linkedin/AAAA-MM-DD.txt` (texto del post)
+     + `linkedin/AAAA-MM-DD.voice.json` (narración), y
    - los miércoles, también `linkedin/AAAA-MM-DD-book.html` + `.txt` (post del libro, abre con
-     la portada: `<img src="../portadas/<código>.jpg">`).
+     la portada: `<img src="../portadas/<código>.jpg">`), con su `-book.voice.json`.
 2. `publish_daily.py` (cron de la Pi, el mismo de TikTok) convierte cada par en
    `docs/videos/li-<nombre>-<hash>.mp4`, lo sube junto con los de TikTok y manda a Make:
    `{"caption": <texto del post>, "video_url": ..., "platform": "linkedin"}`.
