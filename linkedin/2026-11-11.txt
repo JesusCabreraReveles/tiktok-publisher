@@ -1,0 +1,22 @@
+Most outages don't get worse because of the original failure. They get worse because of our retries.
+
+The pattern is always the same: the database slows down, calls start timing out, and every client retries immediately. Now a struggling service is getting more traffic than it had when it was healthy. The retries were meant to hide a blip. Instead they keep the system from recovering.
+
+Retrying is fine. Retrying without rules is the problem. What I put in place before going to production:
+→ Exponential backoff, so each attempt waits longer than the last.
+→ Jitter, so thousands of clients don't come back at the same instant.
+→ A retry budget, so retries can only ever be a small share of total traffic.
+→ A circuit breaker in front of the dependency, so when it's sick we fail fast instead of piling on.
+
+And retry only at one layer. If the client, the gateway and the service all retry, the attempts multiply.
+
+None of this is new. It's just easy to skip when everything works in staging.
+
+Where do your retries live today, and do you know how many attempts one failing request can turn into?
+
+#SoftwareArchitecture #DistributedSystems #Resilience #SRE #Microservices
+
+—
+Geminislabs: https://geminislabs.com/
+Clash of Egos: https://clashofegos.lol/
+My book: https://www.amazon.com.mx/dp/B0HFGY7PVX

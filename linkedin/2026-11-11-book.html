@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="14">
+<meta name="size" content="1080x1350">
+<title>Book: Event-Driven Architecture for Real-Time Telemetry</title>
+<style>
+  :root { --bg1: #06202c; --bg2: #0c2c3e; --acc: #ffc456; --acc2: #00a0d6;
+          --text: #eef6fa; --muted: #9dbccc; --panel: #0f3447; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body { font-family: "Inter", "DejaVu Sans", sans-serif; color: var(--text); position: relative;
+         background: linear-gradient(180deg, var(--bg1), var(--bg2)); }
+  .dots { position: absolute; inset: 0; opacity: .5;
+          background-image: radial-gradient(circle, #164257 2px, transparent 2.5px);
+          background-size: 44px 44px; }
+  .tag { position: absolute; left: 80px; top: 64px; font-size: 28px; font-weight: 700;
+         letter-spacing: 4px; color: var(--acc); animation: in .5s ease-out 0s both; }
+
+  /* cover: big and centered first, then it moves to the top-left */
+  .cover { position: absolute; left: 240px; top: 150px; width: 600px; border-radius: 6px;
+           box-shadow: 0 30px 60px rgba(0,0,0,.55), 0 0 0 2px rgba(255,255,255,.08);
+           transform-origin: 0 0;
+           animation: coverIn .8s ease-out .2s both, toCorner .9s cubic-bezier(.6,0,.2,1) 4.4s forwards; }
+
+  .side { position: absolute; left: 420px; top: 160px; width: 580px; }
+  .side h2 { font-size: 34px; font-weight: 800; color: var(--acc); letter-spacing: 1px;
+             animation: in .5s ease-out 5.3s both; }
+  .pt { margin-top: 26px; padding: 22px 26px; border-radius: 16px; background: var(--panel);
+        border-left: 8px solid var(--acc2); font-size: 34px; font-weight: 700; line-height: 1.2; }
+  .p1 { animation: in .5s ease-out 5.8s both; }
+  .p2 { animation: in .5s ease-out 6.5s both; }
+  .p3 { animation: in .5s ease-out 7.2s both; }
+
+  .for { position: absolute; left: 80px; right: 80px; top: 720px; font-size: 44px; font-weight: 800;
+         line-height: 1.15; animation: in .6s ease-out 8.3s both; }
+  .for span { color: var(--acc); }
+  .series { position: absolute; left: 80px; top: 860px; font-size: 26px; color: var(--muted);
+            letter-spacing: 1px; animation: in .5s 8.8s both; }
+
+  .cta { position: absolute; left: 80px; right: 80px; top: 960px; padding: 40px 44px;
+         border-radius: 22px; background: var(--acc); color: #10222c;
+         animation: pop .6s ease-out 9.8s both; }
+  .cta .a { font-size: 34px; font-weight: 700; }
+  .cta .b { font-size: 50px; font-weight: 900; margin-top: 8px; letter-spacing: -0.5px; }
+  .cta .c { font-size: 26px; font-weight: 600; margin-top: 10px; opacity: .8; }
+
+  .brand { position: absolute; left: 80px; bottom: 34px; font-size: 22px; color: var(--muted); }
+
+  @keyframes in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes pop { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: none; } }
+  @keyframes coverIn { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+  /* 240,150 width 600  ->  80,150 width 300 */
+  @keyframes toCorner { from { transform: none; } to { transform: translate(-160px, 0) scale(.5); } }
+</style>
+</head>
+<body>
+  <div class="dots"></div>
+  <div class="tag">MY BOOK · WEDNESDAY</div>
+
+  <img class="cover" src="../portadas/B0HFTBY42R.jpg" alt="">
+
+  <div class="side">
+    <h2>A FIELD PLAYBOOK FOR</h2>
+    <div class="pt p1">Event contracts</div>
+    <div class="pt p2">State &amp; time in streams</div>
+    <div class="pt p3">Resilient event flows</div>
+  </div>
+
+  <div class="for">For engineers running <span>real-time telemetry in production.</span></div>
+  <div class="series">Production Systems Field Playbooks</div>
+
+  <div class="cta">
+    <div class="a">On Amazon · search</div>
+    <div class="b">“Jesús Cabrera Reveles”</div>
+    <div class="c">Link in the post</div>
+  </div>
+
+  <div class="brand">geminislabs.com</div>
+</body>
+</html>

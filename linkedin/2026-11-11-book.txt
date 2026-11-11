@@ -1,0 +1,22 @@
+Real-time telemetry looks simple on a whiteboard: devices emit events, services react. In production it breaks in quieter ways: a producer changes a field and nobody notices, events arrive late or out of order, and state drifts until the dashboards stop telling the truth.
+
+I wrote "Event-Driven Architecture for Real-Time Telemetry: A Field Playbook for Contracts, State, Time, and Resilient Event Flows" for the engineers who run these systems, not just design them.
+
+It focuses on four things:
+→ Contracts between producers and consumers
+→ State that stays correct as events keep arriving
+→ Time: events that arrive late or out of order
+→ Event flows that keep working when parts of the system fail
+
+It's a field playbook written by a practitioner: practical, and aimed at systems already in production.
+
+Get it on Amazon: https://www.amazon.com.mx/dp/B0HFTBY42R
+
+What breaks first in your event pipelines: contracts, state, or time?
+
+#EventDrivenArchitecture #IoT #Telemetry #SoftwareArchitecture #DistributedSystems
+
+—
+Geminislabs: https://geminislabs.com/
+Clash of Egos: https://clashofegos.lol/
+My book: https://www.amazon.com.mx/dp/B0HFTBY42R
