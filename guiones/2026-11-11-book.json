@@ -1,0 +1,15 @@
+{
+  "lang": "es",
+  "tag": "LIBRO · MIÉRCOLES",
+  "brand": "geminislabs.com",
+  "cover": "portadas/B0HFTBY42R.jpg",
+  "caption": "Mi libro Event-Driven Architecture for Real-Time Telemetry está en Amazon (en inglés). Búscalo como \"Jesús Cabrera Reveles\".",
+  "hashtags": ["#booktok", "#libros", "#programacion", "#techtok"],
+  "slides": [
+    {"screen": "¿Tus eventos llegan desordenados?", "say": "Tus sensores mandan eventos tarde, duplicados y fuera de orden. Y tu sistema decide como si todo llegara perfecto."},
+    {"screen": "Escribí un libro sobre esto", "say": "Escribí un libro sobre arquitectura orientada a eventos para telemetría en tiempo real. Está en inglés."},
+    {"screen": "Contratos, estado y tiempo", "say": "Te ayuda a definir contratos de eventos, manejar estado y tiempo, y diseñar flujos que resisten fallas."},
+    {"screen": "Para equipos de telemetría", "say": "Es para ingenieros y arquitectos que construyen plataformas de telemetría, internet de las cosas o datos en tiempo real."},
+    {"screen": "Está en Amazon", "say": "Está en Amazon, en inglés. Búscalo con mi nombre completo: Jesús Cabrera Reveles. Sígueme para más."}
+  ]
+}

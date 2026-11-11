@@ -1,0 +1,15 @@
+{
+  "lang": "es",
+  "tag": "ARQUITECTURA · MIÉRCOLES",
+  "brand": "geminislabs.com",
+  "caption": "Tus peores caídas vendrán de cambios pequeños. Tres formas de diseñar para fallar en pequeño y limitar el impacto.",
+  "hashtags": ["#tecnologia", "#programacion", "#arquitecturadesoftware", "#techtok"],
+  "slides": [
+    {"screen": "Tu peor caída será un cambio pequeño", "say": "Las caídas más grandes casi nunca vienen de un ataque. Vienen de un cambio pequeño que llegó a todos al mismo tiempo.", "photo": "server room dark"},
+    {"screen": "La meta: fallar en pequeño", "say": "No puedes evitar todos los errores. Lo que sí controlas es a cuántos usuarios alcanza cada uno.", "photo": "domino falling"},
+    {"screen": "1. Despliega por etapas", "say": "Primero a un grupo pequeño, luego a más. Si algo se rompe, solo lo ve una fracción y regresas rápido.", "photo": "staircase steps"},
+    {"screen": "2. La configuración también es código", "say": "Un archivo de configuración te puede tumbar igual que el código. Revísalo, pruébalo y despliégalo por etapas.", "photo": "control panel switches"},
+    {"screen": "3. Divide en celdas", "say": "Separa a tus clientes en grupos independientes. Si una celda cae, las demás siguen funcionando.", "photo": "ship watertight compartments"},
+    {"screen": "¿A cuántos afecta si falla?", "say": "Antes de cada cambio, pregúntate: si esto falla, ¿a cuántos afecta? Sígueme para más.", "photo": "engineer looking at monitors"}
+  ]
+}
