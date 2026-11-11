@@ -15,6 +15,10 @@ docs/videos/li-<name>-<hash>.mp4 (render_diagram.py) and goes to Make with the p
 to "make_webhook_linkedin_url" if set, otherwise to the same "make_webhook_url" as TikTok
 (that scenario already creates the draft on the LinkedIn profile). A LinkedIn problem never stops the
 TikTok videos: that post is held, the others go out, and the run ends with an error.
+Sound (11 nov 2026): every LinkedIn video gets a soundtrack (add_audio.py): the narration in
+linkedin/YYYY-MM-DD[-name].voice.json read in English by Kokoro, over soft generated background
+music. Without a .voice.json, or if the voice fails, it still gets the music: never silent. If
+even the music step fails, the silent video goes out (logged as a warning) rather than holding it.
 
 Usage:
   python3 publish_daily.py                 # today's scripts
@@ -67,6 +71,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG = os.path.join(HERE, "config.json")
 SENT_DIR = os.path.join(HERE, "logs", "sent")
 PY = sys.executable
+AUDIO_VERSION = b"audio-v1"
 
 
 def log(msg):
@@ -225,6 +230,13 @@ def main():
             raw_html = f.read()
         with open(txt_path, "rb") as f:
             raw_txt = f.read()
+        voice_path = os.path.splitext(html_path)[0] + ".voice.json"
+        raw_voice = b""
+        if os.path.isfile(voice_path):
+            with open(voice_path, "rb") as f:
+                raw_voice = f.read()
+        else:
+            log(f"WARNING: linkedin/{stem} has no {stem}.voice.json: the video gets music only.")
         lost = missing_images(raw_html.decode("utf-8", errors="replace"))
         if lost and not args.allow_missing_cover:
             log(f"ERROR: linkedin/{stem} uses images that are not in the repo: {', '.join(lost)}. "
@@ -236,21 +248,34 @@ def main():
             log(f"ERROR: linkedin/{stem}.txt is empty. Held.")
             held.append(f"linkedin/{stem}")
             continue
-        name = f"li-{stem}-{hashlib.sha1(raw_html + raw_txt).hexdigest()[:8]}"
+        # AUDIO_VERSION makes videos rendered before sound existed come out with a new name
+        name = f"li-{stem}-{hashlib.sha1(raw_html + raw_txt + raw_voice + AUDIO_VERSION).hexdigest()[:8]}"
         rel_video = f"docs/videos/{name}.mp4"
         video = os.path.join(HERE, rel_video)
         os.makedirs(os.path.dirname(video), exist_ok=True)
         if os.path.exists(video) and not args.force:
             log(f"Video already exists, reusing it: {rel_video}")
         else:
+            silent = video[:-4] + ".silent.mp4"
             try:
-                render([PY, "render_diagram.py", html_path, "-o", video], cfg)
+                render([PY, "render_diagram.py", html_path, "-o", silent], cfg)
             except subprocess.CalledProcessError as e:
                 log(f"ERROR rendering linkedin/{stem}: {e}. Held.")
-                if os.path.exists(video):
-                    os.remove(video)
+                for p in (silent, video):
+                    if os.path.exists(p):
+                        os.remove(p)
                 held.append(f"linkedin/{stem}")
                 continue
+            seed = int(hashlib.sha1(stem.encode()).hexdigest()[:6], 16)
+            cmd = [PY, "add_audio.py", silent, "-o", video, "--seed", str(seed)]
+            if raw_voice:
+                cmd += ["--voice", voice_path]
+            try:
+                render(cmd, cfg)
+                os.remove(silent)
+            except subprocess.CalledProcessError as e:
+                log(f"WARNING: could not add sound to linkedin/{stem} ({e}). Sending it silent.")
+                os.replace(silent, video)
         jobs.append({"kind": "linkedin", "text": text, "name": name, "rel_video": rel_video})
 
     if not jobs:
