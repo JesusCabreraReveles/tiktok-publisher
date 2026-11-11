@@ -1,0 +1,8 @@
+{
+  "voice": "am_michael",
+  "segments": [
+    {"at": 0.4, "say": "Naive retries amplify outages. Every client hits a sick database again."},
+    {"at": 6.5, "say": "The fix: backoff, jitter, a retry budget, and a circuit breaker."},
+    {"at": 11.2, "say": "Retry less. Recover sooner."}
+  ]
+}
