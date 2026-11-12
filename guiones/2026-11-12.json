@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "FOUNDERS · JUEVES",
+  "brand": "geminislabs.com",
+  "caption": "Tus primeras contrataciones definen tu startup. Tres errores que los fundadores repiten al armar su equipo.",
+  "hashtags": ["#tecnologia", "#emprendimiento", "#startups", "#techtok"],
+  "slides": [
+    {"screen": "Tus primeras contrataciones definen todo", "say": "Tus primeras cinco contrataciones pesan más que tu plan de negocio. Ellas deciden cómo va a trabajar todo el equipo después.", "photo": "small team office"},
+    {"screen": "1. Contratar por currículum", "say": "Un gran nombre en el currículum no garantiza nada. En una startup no hay manual. Busca gente que resuelva sin instrucciones.", "photo": "job interview desk"},
+    {"screen": "2. Contratar demasiado rápido", "say": "Levantas dinero y sientes prisa por crecer. Cada persona nueva suma juntas, coordinación y costo. Contrata cuando el dolor sea real.", "photo": "busy open office"},
+    {"screen": "3. Aguantar al que no encaja", "say": "Esperar a que alguien mejore por lástima le cuesta al resto del equipo. Decide rápido, con claridad y con respeto.", "photo": "empty meeting room"},
+    {"screen": "Pocos, buenos y con dueño", "say": "Mejor un equipo pequeño donde cada quien es dueño de algo, que uno grande donde nadie responde. Sígueme para más.", "photo": "team working laptops night"}
+  ]
+}
