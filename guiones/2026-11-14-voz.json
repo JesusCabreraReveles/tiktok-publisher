@@ -1,0 +1,44 @@
+{
+  "lang": "es",
+  "tag": "IA · SÁBADO",
+  "brand": "geminislabs.com",
+  "caption": "Un plugin de Google con memoria adaptativa y agentes sin memoria que validan el trabajo. Post completo en cabrera.systems/blog",
+  "hashtags": [
+    "#ia",
+    "#agentes",
+    "#desarrollodesoftware",
+    "#techtok"
+  ],
+  "slides": [
+    {
+      "screen": "¿Y si el validador no recuerda nada?",
+      "say": "¿Y si el mejor validador de tareas es un agente que no recuerda nada?",
+      "photo": "robot thinking abstract"
+    },
+    {
+      "screen": "1. Memoria adaptativa por proyecto",
+      "say": "Estoy probando un plugin de Google, Elephant Golden Fish. Su memoria se adapta a tu proyecto, y eso fue lo que más me interesó.",
+      "photo": "notebook writing plan"
+    },
+    {
+      "screen": "2. Agentes sin memoria validan",
+      "say": "Otros agentes trabajan desde cero, sin esa memoria. Su función es validar que se hizo lo que se definió al principio.",
+      "photo": "checklist on desk"
+    },
+    {
+      "screen": "Lo uso en OrqestrAI",
+      "say": "Lo uso en OrqestrAI, mi ambiente que simula Scrum, con agentes como Product Owner, Arquitecto o Scrum Master.",
+      "photo": "team meeting office"
+    },
+    {
+      "screen": "Menos tokens, menos retrabajo",
+      "say": "Los agentes se validan entre ellos y aprueban tareas terminadas. Ha reducido bastante el consumo de tokens y el retrabajo.",
+      "photo": "kanban board sticky notes"
+    },
+    {
+      "screen": "Validar sin memoria funciona",
+      "say": "Lo cuento completo en mi blog. Sígueme para más.",
+      "photo": "laptop code dark"
+    }
+  ]
+}
