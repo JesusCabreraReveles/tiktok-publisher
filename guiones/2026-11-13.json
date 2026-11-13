@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "TENDENCIAS · VIERNES",
+  "brand": "geminislabs.com",
+  "caption": "Microsoft 365 caído, más de mil fallas parchadas y United frenando agentes de IA. Tu negocio necesita un plan B.",
+  "hashtags": ["#tecnologia", "#ciberseguridad", "#ia", "#techtok"],
+  "slides": [
+    {"screen": "Esta semana la tecnología se rompió", "say": "Tres noticias de esta semana dicen lo mismo: dependes de sistemas que no controlas. Te cuento.", "photo": "broken chain closeup"},
+    {"screen": "1. Outlook y Teams, caídos", "say": "Outlook, Teams y Copilot fallaron en decenas de países y la falla siguió al día siguiente. Miles de empresas sin correo.", "photo": "frustrated office worker laptop"},
+    {"screen": "2. Más de mil vulnerabilidades", "say": "El parche mensual de Microsoft corrigió más de mil fallas de seguridad. Es el segundo mes seguido arriba de mil, y una ya se explotaba.", "photo": "server room lights"},
+    {"screen": "3. United frena a los agentes", "say": "United Airlines ya no deja que agentes de IA compren boletos por ti. Pueden mostrar vuelos, pero tú debes pagar.", "photo": "airport departure gate"},
+    {"screen": "Ten un plan B", "say": "Ten un canal alterno para comunicarte, parcha cada mes y no diseñes flujos que dependan de un agente con acceso total. Sígueme para más.", "photo": "team planning whiteboard"}
+  ]
+}
