@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "LIDERAZGO · LUNES",
+  "brand": "geminislabs.com",
+  "caption": "La IA ahorra tiempo, pero eso no es crecimiento. Tres errores de liderazgo que frenan su impacto real.",
+  "hashtags": ["#ia", "#liderazgo", "#emprendimiento", "#techtok"],
+  "slides": [
+    {"screen": "La IA te ahorra horas. ¿Y luego?", "say": "La IA ya le ahorra horas a tu equipo. Pero, según una encuesta reciente de EY, a muchos directores les cuesta convertir eso en crecimiento.", "photo": "office wall clock"},
+    {"screen": "1. Nadie decide en qué usarlo", "say": "Error uno: el tiempo ahorrado se pierde en más juntas y más correos. Decide tú en qué se invierte.", "photo": "busy meeting room"},
+    {"screen": "2. Medir horas, no resultados", "say": "Error dos: celebrar horas ahorradas. Lo que importa es si vendes más, entregas antes o atiendes mejor a tus clientes.", "photo": "business charts laptop"},
+    {"screen": "3. Procesos viejos, herramienta nueva", "say": "Error tres: pegar la IA a procesos viejos. Si el proceso no cambia, el resultado tampoco.", "photo": "factory assembly line"},
+    {"screen": "Productividad no es crecimiento", "say": "Esta semana elige un proceso, mide su resultado de negocio y decide a dónde va el tiempo libre. Sígueme para más.", "photo": "team planning whiteboard"}
+  ]
+}
