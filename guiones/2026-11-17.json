@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "IA · MARTES",
+  "brand": "geminislabs.com",
+  "caption": "Según TeamViewer, el 61% prefiere que la IA no actúe sola. Tres reglas para que tu equipo confíe en los agentes.",
+  "hashtags": ["#ia", "#negocios", "#agentesdeia", "#techtok"],
+  "slides": [
+    {"screen": "¿Dejarías a la IA decidir sola?", "say": "Una encuesta de TeamViewer a cuatro mil doscientas personas encontró que el sesenta y uno por ciento prefiere que la IA no actúe sola.", "photo": "office worker computer"},
+    {"screen": "Mito: todos quieren agentes autónomos", "say": "Realidad: solo el cinco por ciento acepta que la IA opere sin una persona revisando.", "photo": "robot arm factory"},
+    {"screen": "1. Que avise antes de actuar", "say": "El treinta y seis por ciento lo aceptaría si el agente avisa antes de hacer un cambio importante.", "photo": "smartphone notification hand"},
+    {"screen": "2. Limita lo que puede tocar", "say": "Otro treinta y seis por ciento pide límites claros a lo que la IA puede ver. Empieza con permisos mínimos.", "photo": "locked door key"},
+    {"screen": "3. Registro y botón de deshacer", "say": "Guarda un registro visible de todo lo que hace y ten cómo revertirlo. Así crece la confianza. Sígueme para más.", "photo": "server room"}
+  ]
+}
