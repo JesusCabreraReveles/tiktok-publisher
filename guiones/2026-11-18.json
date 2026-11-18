@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "ARQUITECTURA · MIÉRCOLES",
+  "brand": "geminislabs.com",
+  "caption": "La caída de Microsoft 365 empezó con un error dormido y la conmutación por error lo esparció. Tres lecciones de arquitectura.",
+  "hashtags": ["#tecnologia", "#programacion", "#arquitecturadesoftware", "#techtok"],
+  "slides": [
+    {"screen": "Tu respaldo también te puede tumbar", "say": "La semana pasada Microsoft 365 estuvo caído casi un día entero. Y lo que esparció la falla fue su propio mecanismo de respaldo.", "photo": "data center corridor"},
+    {"screen": "Un error dormido por meses", "say": "Según su reporte preliminar, un error llevaba más de tres meses en producción sin dar problemas. Solo explotó con más tráfico y menos capacidad.", "photo": "ticking clock dark"},
+    {"screen": "1. Mover tráfico es mover carga", "say": "Cuando un servidor falla y mandas su tráfico a otro, ese otro también puede caer. Calcula si los demás aguantan.", "photo": "highway traffic jam"},
+    {"screen": "2. No reinicies contra la avalancha", "say": "Un servidor que regresa recibe todo el tráfico acumulado de golpe. Deja entrar carga poco a poco.", "photo": "dam water release"},
+    {"screen": "3. Prueba tu respaldo con carga real", "say": "Un respaldo que nunca probaste con tráfico real es una apuesta. Pruébalo antes de que te toque usarlo. Sígueme para más.", "photo": "engineers control room"}
+  ]
+}

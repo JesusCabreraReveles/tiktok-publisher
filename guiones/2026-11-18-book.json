@@ -1,0 +1,15 @@
+{
+  "lang": "es",
+  "tag": "LIBRO · MIÉRCOLES",
+  "brand": "geminislabs.com",
+  "cover": "portadas/B0HFC397XX.jpg",
+  "caption": "Mi libro Diagnosing and Preventing Alert Fatigue está en Amazon (en inglés). Búscalo como \"Jesús Cabrera Reveles\".",
+  "hashtags": ["#booktok", "#libros", "#programacion", "#techtok"],
+  "slides": [
+    {"screen": "¿Ya ignoras tus alertas?", "say": "Si tu equipo recibe tantas alertas que ya las ignora, la alerta importante va a pasar desapercibida."},
+    {"screen": "Escribí un libro sobre esto", "say": "Escribí un libro sobre cómo diagnosticar y prevenir la fatiga de alertas en sistemas de internet de las cosas y telemetría. Está en inglés."},
+    {"screen": "Diagnostica y previene", "say": "Te ayuda a entender por qué tus alertas generan ruido y a prevenirlo en sistemas en producción."},
+    {"screen": "Para quien está de guardia", "say": "Es para ingenieros y equipos que operan plataformas de telemetría y responden alertas de producción."},
+    {"screen": "Está en Amazon", "say": "Está en Amazon, en inglés. Búscalo con mi nombre completo: Jesús Cabrera Reveles. Sígueme para más."}
+  ]
+}
