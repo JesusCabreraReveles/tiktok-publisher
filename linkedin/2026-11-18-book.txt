@@ -1,0 +1,20 @@
+When everything pages, nothing gets attention. In IoT and telemetry systems, thousands of devices and sensors can turn a reasonable alert rule into a stream of noise, and the alert that matters arrives buried among the ones nobody reads anymore.
+
+I wrote "Diagnosing and Preventing Alert Fatigue in IoT & Telemetry Systems: A Field Playbook for Production Systems" for the engineers who live with those pagers.
+
+It covers two jobs:
+→ Diagnosing alert fatigue in a system that already has it
+→ Preventing it in the systems you build next
+
+It's a field playbook written by a practitioner, aimed at production systems rather than whiteboard designs.
+
+Get it on Amazon: https://www.amazon.com.mx/dp/B0HFC397XX
+
+How many of the alerts that fired on your team last week led to someone taking an action?
+
+#AlertFatigue #IoT #Telemetry #SRE #Observability
+
+—
+Geminislabs: https://geminislabs.com/
+Clash of Egos: https://clashofegos.lol/
+My book: https://www.amazon.com.mx/dp/B0HFC397XX

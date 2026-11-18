@@ -1,0 +1,20 @@
+Failover only helps when the failure is independent. Last week, Microsoft's was not.
+
+Per Microsoft's preliminary incident report on the November 12 Microsoft 365 outage: a defect in a fix for its networking gateway servers had been running since July. Under certain load, lock contention exhausted CPU and memory. A routine failover raised load on the gateway, servers stopped responding, and their traffic moved to healthy servers that carried the same defect. In under two hours, more than 80% of the gateway fleet was unresponsive. Exchange Online took the longest to recover.
+
+When every node shares the bug, redistributing load just picks the next victim. What I want in place before that day:
+→ Admission control at the edge: reject the excess instead of pushing it onto survivors.
+→ Cells with hard boundaries, so one bad pool can't drain the rest.
+→ Load tests on the biggest, newest hardware you run, not only the cheapest.
+→ A way to revert old changes, not just last week's deploy.
+
+Rejecting some requests fast is a better outcome than everyone waiting on a dead fleet.
+
+Does your failover plan assume the surviving nodes are healthier than the one that died?
+
+#SoftwareArchitecture #SRE #Resilience #DistributedSystems #IncidentManagement
+
+—
+Geminislabs: https://geminislabs.com/
+Clash of Egos: https://clashofegos.lol/
+My book: https://www.amazon.com.mx/dp/B0HGMSQ4Y5

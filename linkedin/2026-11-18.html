@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="15">
+<meta name="size" content="1080x1350">
+<title>Failover cascade vs load shedding</title>
+<style>
+  :root {
+    --bg: #0c1a13; --panel: #13281d; --line: #2c5a40;
+    --green: #2ecc71; --lime: #c6f432; --text: #eaf5ee; --muted: #8fb5a0; --red: #ff5a5f;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1080px; height: 1350px; background: var(--bg); overflow: hidden; }
+  body { font-family: "Inter", "DejaVu Sans", sans-serif; color: var(--text); position: relative; }
+  .grid { position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #1d3a2a 2px, transparent 2.5px);
+    background-size: 44px 44px; opacity: .55; }
+  .tag { position: absolute; left: 80px; top: 70px; font-size: 28px; font-weight: 700;
+    letter-spacing: 4px; color: var(--lime); animation: in .5s ease-out 0s both; }
+  .title { position: absolute; left: 80px; top: 120px; width: 920px; font-size: 72px;
+    font-weight: 800; line-height: 1.05; letter-spacing: -1px; }
+  .t1 { animation: in .5s ease-out .1s both, out .4s ease-in 7.0s forwards; }
+  .t2 { animation: in .5s ease-out 7.5s both; }
+  .t2 span, .t1 span { color: var(--lime); }
+  .bottom { position: absolute; left: 80px; right: 80px; top: 1215px; font-size: 40px;
+    font-weight: 700; text-align: center; animation: in .6s ease-out 11.0s both; }
+  .bottom span { color: var(--lime); }
+  .brand { position: absolute; left: 80px; bottom: 34px; font-size: 22px; color: var(--muted);
+    animation: in .5s 0s both; }
+  .step { position: absolute; right: 80px; bottom: 34px; font-size: 22px; color: var(--muted); }
+  .s1 { animation: in .3s 0s both, out .3s 7.0s forwards; }
+  .s2 { animation: in .3s 7.5s both; }
+  svg { position: absolute; left: 0; top: 0; }
+  svg text { font-family: "Inter", "DejaVu Sans", sans-serif; fill: var(--text); }
+
+  .box rect.frame { fill: var(--panel); stroke: var(--line); stroke-width: 3; }
+  .box .name { font-size: 36px; font-weight: 700; }
+  .box .sub { font-size: 24px; fill: var(--muted); }
+  .track { fill: #0c1a13; stroke: var(--line); stroke-width: 2; }
+  .bar { transform-box: fill-box; transform-origin: left center; }
+
+  .draw { fill: none; stroke: var(--green); stroke-width: 6; stroke-linecap: round;
+    stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .flow { fill: none; stroke: var(--lime); stroke-width: 6; stroke-linecap: round;
+    stroke-dasharray: .03 .05; opacity: 0; }
+
+  /* ---------- 1 / 2 · the problem ---------- */
+  .b-cli { animation: pop .5s ease-out .5s both; }
+  .n-a   { animation: pop .5s ease-out .9s both; }
+  .n-b   { animation: pop .5s ease-out 1.05s both; }
+  .n-c   { animation: pop .5s ease-out 1.2s both; }
+  .n-d   { animation: pop .5s ease-out 1.35s both; }
+  .pa    { animation: draw .6s ease-in-out 1.6s forwards, out .3s 7.0s forwards; }
+  .f-a   { animation: pop .3s ease-out 2.6s both; }
+  .f-b   { animation: pop .3s ease-out 3.3s both, out .3s 7.0s forwards; }
+  .f-c   { animation: pop .3s ease-out 4.0s both, out .3s 7.0s forwards; }
+  .f-d   { animation: pop .3s ease-out 4.6s both, out .3s 7.0s forwards; }
+  .lost  { animation: in .4s 4.9s both, out .3s 7.0s forwards; }
+
+  /* load bars: one 15 s timeline each (percent = second / 15) */
+  .bar-a { animation: barA 15s linear 0s both; }
+  .bar-b { animation: barB 15s linear 0s both; }
+  .bar-c { animation: barC 15s linear 0s both; }
+  .bar-d { animation: barD 15s linear 0s both; }
+  @keyframes barA { 0%,17.3% { transform: scaleX(.35); fill: #2ecc71; }
+                    19.3%,100% { transform: scaleX(0); fill: #ff5a5f; } }
+  @keyframes barB { 0%,17.3% { transform: scaleX(.35); fill: #2ecc71; }
+                    20.7% { transform: scaleX(.47); fill: #2ecc71; }
+                    22% { transform: scaleX(1); fill: #ff5a5f; }
+                    46.7% { transform: scaleX(1); fill: #ff5a5f; }
+                    50.7%,100% { transform: scaleX(.75); fill: #c6f432; } }
+  @keyframes barC { 0%,17.3% { transform: scaleX(.35); fill: #2ecc71; }
+                    20.7% { transform: scaleX(.47); fill: #2ecc71; }
+                    25.3% { transform: scaleX(.7); fill: #2ecc71; }
+                    26.7% { transform: scaleX(1); fill: #ff5a5f; }
+                    46.7% { transform: scaleX(1); fill: #ff5a5f; }
+                    50.7%,100% { transform: scaleX(.35); fill: #2ecc71; } }
+  @keyframes barD { 0%,17.3% { transform: scaleX(.35); fill: #2ecc71; }
+                    20.7% { transform: scaleX(.47); fill: #2ecc71; }
+                    25.3% { transform: scaleX(.7); fill: #2ecc71; }
+                    30% { transform: scaleX(1); fill: #ff5a5f; }
+                    46.7% { transform: scaleX(1); fill: #ff5a5f; }
+                    50.7%,100% { transform: scaleX(.35); fill: #2ecc71; } }
+
+  /* ---------- 2 / 2 · the fix ---------- */
+  .b-gw   { animation: pop .5s ease-out 7.8s both; }
+  .a-gw   { animation: draw .4s ease-in-out 8.2s forwards; }
+  .cells  { animation: in .5s 8.5s both; }
+  .a-c1   { animation: draw .6s ease-in-out 8.9s forwards; }
+  .a-c2   { animation: draw .6s ease-in-out 8.9s forwards; }
+  .shed   { animation: in .4s 9.4s both; }
+  .note   { animation: in .5s 9.8s both; }
+  .flow   { animation: in .3s 10.2s forwards, dash 1s linear 10.2s infinite; }
+
+  .pkt { offset-rotate: 0deg; opacity: 0; }
+  .p2 { offset-path: path("M 540 600 L 540 650 L 770 650 L 770 690");
+        animation: in .2s 10.3s forwards, move 1.4s ease-in-out 10.3s infinite; }
+
+  @keyframes in   { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes out  { to { opacity: 0; } }
+  @keyframes pop  { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes dash { to { stroke-dashoffset: -.08; } }
+  @keyframes move { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+  g { transform-box: fill-box; transform-origin: center; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="tag">ARCHITECTURE · WEDNESDAY</div>
+  <div class="title t1">Failover moved the load<br><span>onto the same bug.</span></div>
+  <div class="title t2">The fix: shed load,<br><span>contain the blast.</span></div>
+
+  <svg width="1080" height="1350" viewBox="0 0 1080 1350">
+    <!-- problem arrows: every node shares the same pool -->
+    <path class="draw pa" pathLength="1" d="M 540 420 L 540 650 L 195 650 L 195 720"/>
+    <path class="draw pa" pathLength="1" d="M 540 650 L 425 650 L 425 720"/>
+    <path class="draw pa" pathLength="1" d="M 540 650 L 655 650 L 655 720"/>
+    <path class="draw pa" pathLength="1" d="M 540 650 L 885 650 L 885 720"/>
+
+    <!-- fix arrows -->
+    <path class="draw a-gw" pathLength="1" d="M 540 420 L 540 490"/>
+    <path class="draw a-c1" pathLength="1" d="M 540 600 L 540 650 L 310 650 L 310 690"/>
+    <path class="draw a-c2" pathLength="1" d="M 540 600 L 540 650 L 770 650 L 770 690"/>
+    <path class="flow" pathLength="1" d="M 540 420 L 540 490"/>
+    <path class="flow" pathLength="1" d="M 540 600 L 540 650 L 770 650 L 770 690"/>
+
+    <!-- Clients -->
+    <g class="box b-cli">
+      <rect class="frame" x="390" y="310" width="300" height="110" rx="18"/>
+      <text class="name" x="540" y="360" text-anchor="middle">Clients</text>
+      <text class="sub" x="540" y="396" text-anchor="middle">all traffic</text>
+    </g>
+
+    <!-- Gateway (fix) -->
+    <g class="box b-gw">
+      <rect class="frame" x="300" y="490" width="480" height="110" rx="18" style="stroke: var(--lime)"/>
+      <text class="name" x="540" y="538" text-anchor="middle">Gateway</text>
+      <text class="sub" x="540" y="576" text-anchor="middle">admission control</text>
+    </g>
+    <g class="shed">
+      <path d="M 790 545 L 850 545 M 838 533 L 850 545 L 838 557" fill="none" stroke="var(--muted)" stroke-width="4" stroke-linecap="round"/>
+      <text x="862" y="554" font-size="26" font-weight="700" style="fill: var(--muted)">shed</text>
+    </g>
+
+    <!-- Cells / bulkheads (fix) -->
+    <g class="cells">
+      <rect x="80" y="690" width="452" height="240" rx="22" fill="none" stroke="var(--lime)" stroke-width="3" stroke-dasharray="14 10"/>
+      <rect x="548" y="690" width="452" height="240" rx="22" fill="none" stroke="var(--lime)" stroke-width="3" stroke-dasharray="14 10"/>
+      <text x="104" y="914" font-size="22" font-weight="700" letter-spacing="3" style="fill: var(--lime)">CELL 1</text>
+      <text x="572" y="914" font-size="22" font-weight="700" letter-spacing="3" style="fill: var(--lime)">CELL 2</text>
+    </g>
+
+    <!-- Nodes -->
+    <g class="box n-a">
+      <rect class="frame" x="95" y="720" width="200" height="140" rx="18"/>
+      <text class="name" x="195" y="775" text-anchor="middle">Node A</text>
+      <rect class="track" x="115" y="805" width="160" height="30" rx="6"/>
+      <rect class="bar bar-a" x="117" y="807" width="156" height="26" rx="5"/>
+    </g>
+    <g class="box n-b">
+      <rect class="frame" x="325" y="720" width="200" height="140" rx="18"/>
+      <text class="name" x="425" y="775" text-anchor="middle">Node B</text>
+      <rect class="track" x="345" y="805" width="160" height="30" rx="6"/>
+      <rect class="bar bar-b" x="347" y="807" width="156" height="26" rx="5"/>
+    </g>
+    <g class="box n-c">
+      <rect class="frame" x="555" y="720" width="200" height="140" rx="18"/>
+      <text class="name" x="655" y="775" text-anchor="middle">Node C</text>
+      <rect class="track" x="575" y="805" width="160" height="30" rx="6"/>
+      <rect class="bar bar-c" x="577" y="807" width="156" height="26" rx="5"/>
+    </g>
+    <g class="box n-d">
+      <rect class="frame" x="785" y="720" width="200" height="140" rx="18"/>
+      <text class="name" x="885" y="775" text-anchor="middle">Node D</text>
+      <rect class="track" x="805" y="805" width="160" height="30" rx="6"/>
+      <rect class="bar bar-d" x="807" y="807" width="156" height="26" rx="5"/>
+    </g>
+
+    <!-- failures -->
+    <g class="f-a">
+      <rect x="95" y="720" width="200" height="140" rx="18" fill="none" stroke="var(--red)" stroke-width="5"/>
+      <circle cx="285" cy="712" r="20" fill="var(--red)"/>
+      <path d="M 277 704 L 293 720 M 293 704 L 277 720" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g class="f-b">
+      <rect x="325" y="720" width="200" height="140" rx="18" fill="none" stroke="var(--red)" stroke-width="5"/>
+      <circle cx="515" cy="712" r="20" fill="var(--red)"/>
+      <path d="M 507 704 L 523 720 M 523 704 L 507 720" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g class="f-c">
+      <rect x="555" y="720" width="200" height="140" rx="18" fill="none" stroke="var(--red)" stroke-width="5"/>
+      <circle cx="745" cy="712" r="20" fill="var(--red)"/>
+      <path d="M 737 704 L 753 720 M 753 704 L 737 720" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g class="f-d">
+      <rect x="785" y="720" width="200" height="140" rx="18" fill="none" stroke="var(--red)" stroke-width="5"/>
+      <circle cx="975" cy="712" r="20" fill="var(--red)"/>
+      <path d="M 967 704 L 983 720 M 983 704 L 967 720" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    </g>
+
+    <!-- problem callout -->
+    <g class="lost">
+      <rect x="170" y="970" width="740" height="60" rx="12" fill="#3a1416" stroke="var(--red)" stroke-width="2"/>
+      <text x="540" y="1010" text-anchor="middle" font-size="26" font-weight="700" style="fill: #ffb3b5">same bug + more load = next node falls</text>
+    </g>
+
+    <!-- fix note -->
+    <g class="note">
+      <rect x="140" y="970" width="800" height="60" rx="12" fill="#2a4a12" stroke="var(--lime)" stroke-width="2"/>
+      <text x="540" y="1010" text-anchor="middle" font-size="26" font-weight="700" style="fill: var(--lime)">excess rejected at the gate · cell 2 untouched</text>
+    </g>
+
+    <!-- moving packet: runs only along the gateway → cell 2 arrow, never over text -->
+    <circle class="pkt p2" r="13" fill="var(--lime)"/>
+  </svg>
+
+  <div class="bottom">Shed load. <span>Don't spread the failure.</span></div>
+  <div class="brand">geminislabs.com</div>
+  <div class="step s1">1 / 2 · the problem</div>
+  <div class="step s2">2 / 2 · the fix</div>
+</body>
+</html>
