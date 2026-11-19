@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "FOUNDERS · JUEVES",
+  "brand": "geminislabs.com",
+  "caption": "Levantar una ronda no es ganar. Tres mitos sobre el dinero de inversión que confunden a muchos fundadores.",
+  "hashtags": ["#tecnologia", "#emprendimiento", "#startups", "#techtok"],
+  "slides": [
+    {"screen": "Levantar dinero no es ganar", "say": "Muchos fundadores celebran su ronda de inversión como si ya hubieran ganado. Ojo: el reloj apenas empezó a correr.", "photo": "business handshake office"},
+    {"screen": "Mito 1: más dinero, más tiempo", "say": "Mito: con más dinero tienes más tiempo. Realidad: casi siempre empiezas a gastar más rápido y el tiempo te alcanza igual.", "photo": "hourglass desk"},
+    {"screen": "Mito 2: el inversionista te salva", "say": "Mito: tu inversionista va a resolver tus problemas. Realidad: te da consejos, pero el producto y los clientes siguen siendo tuyos.", "photo": "boardroom meeting"},
+    {"screen": "Mito 3: valuación alta, mejor", "say": "Mito: entre más alta la valuación, mejor. Realidad: una valuación inflada hoy puede complicarte mucho la siguiente ronda.", "photo": "financial chart screen"},
+    {"screen": "Lo que cuenta: clientes que pagan", "say": "Lo que de verdad cuenta son clientes que pagan y regresan. El dinero solo compra tiempo para conseguirlos. Sígueme para más.", "photo": "small shop owner customer"}
+  ]
+}
