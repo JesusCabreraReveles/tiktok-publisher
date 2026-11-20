@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "TENDENCIAS · VIERNES",
+  "brand": "geminislabs.com",
+  "caption": "Los agentes de IA ya usan tu computadora y tu dinero. Dales permisos mínimos y aprobación humana.",
+  "hashtags": ["#ia", "#tecnologia", "#ciberseguridad", "#techtok"],
+  "slides": [
+    {"screen": "La IA ya usa tu computadora", "say": "Esta semana los agentes de IA dejaron de solo responder: ahora usan tu computadora y tu dinero. Tres señales.", "photo": "robot hand laptop"},
+    {"screen": "1. Gemini controla tu Mac", "say": "Google lanzó una función para que Gemini ordene archivos, llene formularios y use aplicaciones en Mac. Por ahora, solo en inglés y en Estados Unidos.", "photo": "laptop desk closeup"},
+    {"screen": "2. Agentes que pagan por ti", "say": "OpenAI presentó una cartera en Chat GPT para que un agente compre por ti. Cada compra la apruebas con tu huella o tu rostro.", "photo": "online shopping smartphone"},
+    {"screen": "3. Un ataque asistido por IA", "say": "Según reportes, la Comisión Europea sufrió un ataque asistido por IA que afectó temporalmente su sistema de nómina.", "photo": "computer code dark screen"},
+    {"screen": "Dale permisos mínimos", "say": "Si vas a usar agentes, dales permisos mínimos, exige aprobación humana para pagos y registra todo lo que hacen. Sígueme para más.", "photo": "padlock keyboard security"}
+  ]
+}
