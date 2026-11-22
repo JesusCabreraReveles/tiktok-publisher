@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="es" data-om-signature="off" data-composition-variables='[
+  {"id":"q1","type":"string","label":"Pregunta 1","default":"¿Dónde está mi flotilla?"},
+  {"id":"a1","type":"string","label":"Nexus · línea","default":"GPS en tiempo real · web + app"},
+  {"id":"q2","type":"string","label":"Pregunta 2","default":"¿Y si no tiene GPS?"},
+  {"id":"a2","type":"string","label":"Orion · línea","default":"Ubicación por señal celular"},
+  {"id":"q3","type":"string","label":"Pregunta 3","default":"Si me accidento en moto, ¿quién sabe quién soy?"},
+  {"id":"a3","type":"string","label":"Signum · línea","default":"Identidad médica en un QR"},
+  {"id":"tagline","type":"string","label":"Cierre","default":"De la señal a la decisión."},
+  {"id":"url","type":"string","label":"URL","default":"geminislabs.com"},
+  {"id":"cyan","type":"color","label":"Cian","default":"#00A6C0"},
+  {"id":"cyanLight","type":"color","label":"Cian claro","default":"#7FE3F5"},
+  {"id":"cream","type":"color","label":"Crema","default":"#F4F1E8"},
+  {"id":"ground","type":"color","label":"Fondo","default":"#04101e"},
+  {"id":"endHold","type":"number","label":"Pausa final (s)","default":1.5,"min":0,"max":6,"step":0.1,"group":"Ritmo"}
+]'>
+<head>
+<meta charset="utf-8">
+<title>Geminis Labs · Preguntas reales</title>
+<script src="vendor/gsap.min.js"></script>
+<style id="om-fonts">
+@font-face { font-family: "Inter"; src: url("assets/fonts/Inter-var.woff") format("woff"); font-weight: 100 900; font-style: normal; }
+</style>
+<style>
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #04101e; }
+  #film { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--ground); color: var(--cream); font-family: Inter, sans-serif; }
+  .mono { font-family: "DejaVu Sans Mono", monospace; }
+  #glow { position: absolute; left: -300px; right: -300px; top: -380px; height: 900px; background: radial-gradient(ellipse at 50% 50%, rgba(0,166,192,.20), rgba(4,16,30,0) 62%); }
+  #grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(127,227,245,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(127,227,245,.05) 1px, transparent 1px); background-size: 60px 60px; }
+  .cnt { position: absolute; right: 70px; top: 72px; font-size: 30px; color: var(--cyan); letter-spacing: .08em; }
+  #flash { position: absolute; inset: 0; background: #7FE3F5; opacity: 0; pointer-events: none; }
+  #scan { position: absolute; left: 30px; top: 25px; width: 200px; height: 8px; background: linear-gradient(90deg, transparent, #E6323C, transparent); box-shadow: 0 0 18px #E6323C; opacity: 0; }
+  #foot { position: absolute; left: 70px; bottom: 64px; font-size: 28px; color: rgba(244,241,232,.55); letter-spacing: .06em; }
+
+  .scene { position: absolute; inset: 0; }
+  .q { position: absolute; left: 70px; top: 160px; width: 940px; font-weight: 900; text-transform: uppercase; letter-spacing: -.045em; line-height: 1.0; }
+  .q .w { display: inline-block; margin-right: .2em; }
+  .q .w.k { color: var(--cyanLight); text-shadow: 0 0 40px rgba(127,227,245,.35); }
+  .strike { position: absolute; left: 56px; height: 14px; width: 968px; background: var(--cyan); transform-origin: 0 50%; box-shadow: 0 0 30px rgba(0,166,192,.6); }
+  .ans { position: absolute; left: 70px; display: flex; align-items: center; gap: 40px; }
+  .ans img { height: 220px; }
+  .ans .n { font-size: 116px; font-weight: 900; letter-spacing: -.03em; line-height: 1; }
+  .ans .s { font-size: 32px; color: rgba(244,241,232,.75); margin-top: 14px; }
+  .viz { position: absolute; left: 70px; width: 940px; height: 250px; border-radius: 26px; background: rgba(10,32,56,.75); border: 2px solid rgba(127,227,245,.22); overflow: hidden; }
+
+  /* Nexus: mapa */
+  #mapgrid { position: absolute; inset: 0; background-image: linear-gradient(rgba(127,227,245,.08) 2px, transparent 2px), linear-gradient(90deg, rgba(127,227,245,.08) 2px, transparent 2px); background-size: 94px 62px; }
+  .road { position: absolute; height: 10px; border-radius: 5px; background: rgba(244,241,232,.12); }
+  .car { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: #6CC24A; box-shadow: 0 0 0 8px rgba(108,194,74,.25), 0 0 24px rgba(108,194,74,.8); }
+  .tag { position: absolute; white-space: nowrap; padding: 6px 14px; border-radius: 10px; background: rgba(4,16,30,.9); border: 1px solid rgba(108,194,74,.6); font-size: 28px; color: #bfe8ad; }
+
+  /* Orion: torres */
+  .tower { position: absolute; width: 60px; height: 110px; }
+  .ring { position: absolute; width: 360px; height: 360px; margin: -180px 0 0 -180px; border-radius: 50%; border: 3px solid rgba(127,227,245,.55); }
+  #fix { position: absolute; left: 470px; top: 160px; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: var(--cyanLight); box-shadow: 0 0 0 10px rgba(127,227,245,.25), 0 0 40px rgba(127,227,245,.9); }
+
+  /* Signum: QR + tarjeta */
+  #qr { position: absolute; left: 30px; top: 25px; width: 200px; height: 200px; background: #F4F1E8; border-radius: 12px; padding: 10px; display: grid; grid-template-columns: repeat(21, 1fr); }
+  #qr i { display: block; }
+  .med { position: absolute; left: 280px; right: 30px; height: 54px; border-radius: 12px; background: rgba(4,16,30,.85); border: 1px solid rgba(230,50,60,.5); display: flex; align-items: center; gap: 16px; padding: 0 20px; font-size: 30px; font-weight: 700; }
+  .med .d { width: 16px; height: 16px; border-radius: 50%; background: #E6323C; }
+
+  /* Cierre */
+  #end { position: absolute; inset: 0; }
+  .mk { position: absolute; top: 400px; height: 210px; }
+  #wm { position: absolute; left: 50%; top: 740px; width: 880px; margin-left: -440px; }
+  #tag { position: absolute; left: 0; right: 0; top: 890px; text-align: center; font-size: 64px; font-weight: 900; letter-spacing: -.02em; }
+  #tag b { color: var(--cyanLight); }
+  #url { position: absolute; left: 0; right: 0; top: 1000px; text-align: center; font-size: 40px; color: var(--cyan); letter-spacing: .06em; }
+</style>
+<!-- om voice inserta aquí el bloque om-cues (tiempos de la voz) -->
+</head>
+<body>
+<div id="film" data-composition-id="film" data-width="1080" data-height="1350">
+  <audio id="om-sound" src="assets/sound.wav" data-start="0" data-duration="22" data-track-index="8" data-volume="1"></audio>
+  <audio id="om-voice" src="assets/voice.wav" data-start="0" data-duration="22" data-track-index="9" data-volume="1"></audio>
+  <div id="glow"></div>
+  <div id="grid"></div>
+
+  <!-- 1 · NEXUS -->
+  <section class="scene" id="s1" data-om-id="escena-nexus">
+    <div class="cnt mono">01 / 03</div>
+    <div class="q" id="q1" data-om-id="pregunta-1" data-om-var="q1" style="font-size:150px"></div>
+    <div class="strike" id="st1" style="top:660px;transform:rotate(-3deg)"></div>
+    <div class="ans" id="an1" data-om-id="nexus" style="top:720px">
+      <img src="assets/mark-nexus.png" alt="Nexus">
+      <div><div class="n">NEXUS</div><div class="s mono" data-var-text="a1">GPS en tiempo real · web + app</div></div>
+    </div>
+    <div class="viz" id="vz1" data-om-id="mapa-nexus" style="top:990px">
+      <div id="mapgrid"></div>
+      <div class="road" style="left:40px;top:70px;width:860px"></div>
+      <div class="road" style="left:40px;top:170px;width:860px"></div>
+      <div class="road" style="left:300px;top:20px;width:10px;height:210px"></div>
+      <div class="road" style="left:640px;top:20px;width:10px;height:210px"></div>
+      <div class="car" id="c1" style="left:60px;top:60px"></div>
+      <div class="car" id="c2" style="left:290px;top:200px"></div>
+      <div class="car" id="c3" style="left:860px;top:160px"></div>
+      <div class="tag mono" id="tg1" style="left:540px;top:96px">Unidad 07 · 62 km/h</div>
+    </div>
+  </section>
+
+  <!-- 2 · ORION -->
+  <section class="scene" id="s2" data-om-id="escena-orion">
+    <div class="cnt mono">02 / 03</div>
+    <div class="q" id="q2" data-om-id="pregunta-2" data-om-var="q2" style="font-size:150px"></div>
+    <div class="strike" id="st2" style="top:520px;transform:rotate(-3deg)"></div>
+    <div class="ans" id="an2" data-om-id="orion" style="top:620px">
+      <img src="assets/mark-orion.png" alt="Orion">
+      <div><div class="n">ORION</div><div class="s mono" data-var-text="a2">Ubicación por señal celular</div></div>
+    </div>
+    <div class="viz" id="vz2" data-om-id="torres-orion" style="top:930px">
+      <div class="ring" id="r1" style="left:150px;top:180px"></div>
+      <div class="ring" id="r2" style="left:790px;top:180px"></div>
+      <div class="ring" id="r3" style="left:470px;top:60px"></div>
+      <svg class="tower" style="left:120px;top:130px" viewBox="0 0 60 110"><path d="M30 10 L50 105 H10 Z M18 70 H42 M22 50 H38" fill="none" stroke="#F4F1E8" stroke-width="5" stroke-linejoin="round"/><circle cx="30" cy="10" r="7" fill="#7FE3F5"/></svg>
+      <svg class="tower" style="left:760px;top:130px" viewBox="0 0 60 110"><path d="M30 10 L50 105 H10 Z M18 70 H42 M22 50 H38" fill="none" stroke="#F4F1E8" stroke-width="5" stroke-linejoin="round"/><circle cx="30" cy="10" r="7" fill="#7FE3F5"/></svg>
+      <svg class="tower" style="left:440px;top:10px" viewBox="0 0 60 110"><path d="M30 10 L50 105 H10 Z M18 70 H42 M22 50 H38" fill="none" stroke="#F4F1E8" stroke-width="5" stroke-linejoin="round"/><circle cx="30" cy="10" r="7" fill="#7FE3F5"/></svg>
+      <div id="fix"></div>
+      <div class="tag mono" id="tg2" style="left:520px;top:185px;border-color:rgba(127,227,245,.6);color:#c9f3fb">sin GPS · ±150 m</div>
+    </div>
+  </section>
+
+  <!-- 3 · SIGNUM -->
+  <section class="scene" id="s3" data-om-id="escena-signum">
+    <div class="cnt mono">03 / 03</div>
+    <div class="q" id="q3" data-om-id="pregunta-3" data-om-var="q3" style="font-size:104px"></div>
+    <div class="strike" id="st3" style="top:575px;transform:rotate(-3deg)"></div>
+    <div class="ans" id="an3" data-om-id="signum" style="top:640px">
+      <img src="assets/mark-signum.png" alt="Signum">
+      <div><div class="n">SIGNUM</div><div class="s mono" data-var-text="a3">Identidad médica en un QR</div></div>
+    </div>
+    <div class="viz" id="vz3" data-om-id="qr-signum" style="top:930px;border-color:rgba(230,50,60,.35)">
+      <div id="qr"></div><div id="scan"></div>
+      <div class="med" id="m1" style="top:28px"><span class="d"></span>Tipo de sangre</div>
+      <div class="med" id="m2" style="top:98px"><span class="d"></span>Alergias</div>
+      <div class="med" id="m3" style="top:168px"><span class="d"></span>Contacto de emergencia</div>
+    </div>
+  </section>
+
+  <!-- Cierre -->
+  <section id="end" data-om-id="cierre">
+    <img class="mk" id="mk1" src="assets/mark-nexus.png" style="left:150px" alt="">
+    <img class="mk" id="mk2" src="assets/mark-orion.png" style="left:450px" alt="">
+    <img class="mk" id="mk3" src="assets/mark-signum.png" style="left:760px" alt="">
+    <img id="wm" src="assets/wordmark.png" data-om-id="logo" alt="Geminis Labs">
+    <div id="tag" data-om-id="tagline"></div>
+    <div id="url" class="mono" data-om-id="url" data-var-text="url">geminislabs.com</div>
+  </section>
+
+  <div id="foot" class="mono">geminislabs.com</div>
+  <div id="flash"></div>
+</div>
+
+<script src="vendor/om.js"></script>
+<script>
+OM.music({ style: 'pulse', bpm: 120, drop: 'nexus', ending: 'ring', energy: { gancho: 0.35, nexus: 0.75, orion: 0.8, signum: 1, cierre: 0.6 } });
+const V = OM.vars();
+const KEY = /flotilla|gps|moto|soy/i;
+function words(el, text) {
+  el.innerHTML = text.split(' ').map((w) => `<span class="w${KEY.test(w) ? ' k' : ''}">${w.replace(/</g, '&lt;')}</span>`).join(' ');
+  return el.querySelectorAll('.w');
+}
+const W1 = words(document.getElementById('q1'), V.q1);
+const W2 = words(document.getElementById('q2'), V.q2);
+const W3 = words(document.getElementById('q3'), V.q3);
+const tagEl = document.getElementById('tag');
+tagEl.innerHTML = V.tagline.replace(/(decisión)/i, '<b>$1</b>');
+
+// QR determinista
+const qr = document.getElementById('qr');
+const R = OM.random(4410);
+const fin = (x, y, ox, oy) => x >= ox && x < ox + 7 && y >= oy && y < oy + 7;
+const finder = (x, y, ox, oy) => { const a = x - ox, b = y - oy; return a === 0 || a === 6 || b === 0 || b === 6 || (a >= 2 && a <= 4 && b >= 2 && b <= 4); };
+const cells = [];
+for (let y = 0; y < 21; y++) for (let x = 0; x < 21; x++) {
+  let on;
+  if (fin(x, y, 0, 0)) on = finder(x, y, 0, 0); else if (fin(x, y, 14, 0)) on = finder(x, y, 14, 0); else if (fin(x, y, 0, 14)) on = finder(x, y, 0, 14);
+  else on = R() > 0.52;
+  const i = document.createElement('i'); i.style.background = on ? '#04101e' : 'transparent'; qr.appendChild(i); cells.push(i);
+}
+
+const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out', immediateRender: false } });
+gsap.set(['#s2', '#s3', '#end'], { opacity: 0 });
+gsap.set(['.strike'], { scaleX: 0 });
+gsap.set(['.ans', '.viz'], { opacity: 0 });
+
+// Palabras de una pregunta: golpean con la voz
+function slam(ws, t0, t1) {
+  const step = (t1 - t0) / ws.length;
+  ws.forEach((w, i) => {
+    tl.fromTo(w, { opacity: 0, y: 70, scale: 1.25 }, { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: 'back.out(2.2)' }, t0 + i * step);
+  });
+}
+const holdEnd = { 1: 6.0, 2: 12.0, 3: 18.0 };
+function answer(n, tHit) {
+  tl.fromTo(`#st${n}`, { scaleX: 0 }, { scaleX: 1, duration: 0.22, ease: 'expo.out' }, tHit - 0.18);
+  tl.fromTo(`#q${n}`, { opacity: 1 }, { opacity: 0.32, duration: 0.25 }, tHit - 0.1);
+  tl.fromTo(`#an${n}`, { opacity: 0, x: 260 }, { opacity: 1, x: 0, duration: 0.42, ease: 'back.out(1.6)' }, tHit);
+  tl.fromTo(`#an${n} img`, { rotationY: -80, scale: 0.6 }, { rotationY: 0, scale: 1, duration: 0.6, ease: 'back.out(1.8)' }, tHit);
+  tl.fromTo(`#vz${n}`, { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power4.out' }, tHit + 0.35);
+  tl.fromTo('#flash', { opacity: 0.45 }, { opacity: 0, duration: 0.3, ease: 'power2.out' }, tHit);
+  tl.fromTo(`#s${n}`, { scale: 1.07 }, { scale: 1, duration: 0.45, ease: 'expo.out' }, tHit);
+  tl.fromTo(`#s${n}`, { scale: 1 }, { scale: 1.045, duration: holdEnd[n] - tHit - 0.7, ease: 'none' }, tHit + 0.45);
+  tl.fromTo(`#an${n} img`, { rotation: 0 }, { rotation: 6, duration: 0.9, ease: 'sine.inOut', yoyo: true, repeat: 1 }, tHit + 1.2);
+  OM.sfx('whoosh', tHit - 0.05, { gain: -4 });
+  OM.sfx('impact', tHit, { gain: n === 1 ? 0 : -4 });
+}
+function leave(n, t) {
+  tl.fromTo(`#s${n}`, { opacity: 1, y: 0 }, { opacity: 0, y: -120, duration: 0.24, ease: 'power3.in' }, t - 0.24);
+}
+function enter(n, t) {
+  tl.fromTo(`#s${n}`, { opacity: 0, y: 0 }, { opacity: 1, y: 0, duration: 0.01 }, t);
+  OM.sfx('hit', t);
+}
+
+// ── 1 · NEXUS ────────────────────────────────
+tl.addLabel('scene:gancho', 0);
+tl.addLabel('scene:nexus', 2.0);
+gsap.set(W1, { opacity: 1 });            // cuadro 0 = póster: la pregunta ya está
+tl.fromTo(W1, { y: 0 }, { y: 0, duration: 0.01 }, 0);
+tl.fromTo('#q1', { scale: 1.06, transformOrigin: '0% 0%' }, { scale: 1, duration: 1.8, ease: 'power2.out' }, 0);
+[0.25, 0.55, 0.8, 1.05].forEach((t, i) => {
+  if (W1[i]) tl.fromTo(W1[i], { scale: 1 }, { scale: 1.12, duration: 0.12, ease: 'power2.out', yoyo: true, repeat: 1, transformOrigin: '0% 100%' }, t);
+});
+tl.fromTo('#glow', { opacity: 0.6, scale: 1 }, { opacity: 1, scale: 1.25, duration: 1.9, ease: 'power1.inOut' }, 0);
+tl.fromTo('#grid', { scale: 1 }, { scale: 1.08, duration: 2.0, ease: 'power1.in' }, 0);
+OM.sfx('pop', 0.25, { gain: -6 }); OM.sfx('pop', 1.05, { gain: -6 });
+answer(1, 2.0);
+[['#c1', 840, 0], ['#c2', 0, -150], ['#c3', -560, 0]].forEach(([id, dx, dy], i) => {
+  tl.fromTo(id, { x: 0, y: 0 }, { x: dx, y: dy, duration: 1.6, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 2.4 + i * 0.12);
+});
+tl.fromTo('#tg1', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(2)' }, 3.0);
+tl.fromTo('#tg1', { x: 0 }, { x: -60, duration: 2.4, ease: 'sine.inOut' }, 3.3);
+OM.sfx('pop', 3.0, { gain: -8 });
+leave(1, 6.0);
+
+// ── 2 · ORION ────────────────────────────────
+tl.addLabel('scene:orion', 6.0);
+enter(2, 6.0);
+slam(W2, 6.05, 7.6);
+answer(2, 8.5);
+['#r1', '#r2', '#r3'].forEach((id, i) => {
+  tl.fromTo(id, { scale: 0.05, opacity: 0.9 }, { scale: 1, opacity: 0.15, duration: 1.1, ease: 'power2.out', repeat: 2 }, 9.0 + i * 0.18);
+});
+tl.fromTo('#fix', { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(3)' }, 10.1);
+tl.fromTo('#tg2', { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3 }, 10.3);
+OM.sfx('ding', 10.1, { gain: -8 });
+tl.fromTo('#fix', { boxShadow: '0 0 0 10px rgba(127,227,245,.25), 0 0 40px rgba(127,227,245,.9)' }, { boxShadow: '0 0 0 34px rgba(127,227,245,0), 0 0 60px rgba(127,227,245,1)', duration: 0.6, ease: 'power1.out', repeat: 2 }, 10.4);
+leave(2, 12.0);
+
+// ── 3 · SIGNUM ───────────────────────────────
+tl.addLabel('scene:signum', 12.0);
+enter(3, 12.0);
+slam(W3, 12.05, 14.2);
+answer(3, 14.5);
+cells.forEach((c, i) => {
+  const x = i % 21, y = Math.floor(i / 21);
+  tl.fromTo(c, { opacity: 0 }, { opacity: 1, duration: 0.05, ease: 'none' }, 14.95 + (x + y) * 0.022);
+});
+OM.sfx('shutter', 15.85, { gain: -6 });
+tl.fromTo('#scan', { opacity: 1, y: 0 }, { opacity: 1, y: 192, duration: 0.6, ease: 'sine.inOut', yoyo: true, repeat: 2 }, 16.2);
+['#m1', '#m2', '#m3'].forEach((id, i) => {
+  tl.fromTo(id, { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.3, ease: 'back.out(1.8)' }, 15.6 + i * 0.3);
+  OM.sfx('tick', 15.6 + i * 0.3, { gain: -8 });
+});
+leave(3, 18.0);
+
+// ── Cierre ───────────────────────────────────
+tl.addLabel('scene:cierre', 18.0);
+tl.fromTo('#end', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 18.0);
+tl.fromTo(['#foot'], { opacity: 1 }, { opacity: 0, duration: 0.2 }, 17.8);
+OM.sfx('hit', 18.0);
+[['#mk1', -500], ['#mk2', 0], ['#mk3', 500]].forEach(([id, dx], i) => {
+  tl.fromTo(id, { opacity: 0, x: dx, y: dx === 0 ? -300 : 0, scale: 1.4 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.5)' }, 18.0 + i * 0.12);
+});
+tl.fromTo('#wm', { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'expo.out' }, 18.4);
+OM.sfx('chime', 18.4, { gain: -4 });
+tl.fromTo('#tag', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4 }, 19.6);
+tl.fromTo('#url', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35 }, 20.0);
+tl.fromTo('.mk', { y: 0 }, { y: -8, duration: 1.0, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 19.0);
+tl.to({}, { duration: Math.max(0, 22.0 - 20.35) + (V.endHold - 1.5) }, 20.35);
+
+window.__timelines['film'] = tl;
+</script>
+</body>
+</html>

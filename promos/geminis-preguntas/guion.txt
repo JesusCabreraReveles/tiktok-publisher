@@ -1,0 +1,7 @@
+¿Dónde está mi flotilla?
+Nexus. GPS en tiempo real, en web y en app.
+¿Y si el dispositivo no tiene GPS?
+Orion lo ubica con la señal celular.
+Si me accidento en moto, ¿quién sabe quién soy?
+Signum. Tu identidad médica en un código QR.
+Geminis Labs. De la señal a la decisión.
