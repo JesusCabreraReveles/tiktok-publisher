@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "LIDERAZGO · LUNES",
+  "brand": "geminislabs.com",
+  "caption": "Cuando se cae el sistema, tu equipo te mira a ti. Tres errores de liderazgo en plena crisis.",
+  "hashtags": ["#tecnologia", "#liderazgo", "#programacion", "#techtok"],
+  "slides": [
+    {"screen": "Se cayó todo. ¿Y tú qué haces?", "say": "La semana pasada varias caídas grandes pusieron a prueba a los equipos de tecnología. En una crisis, tu equipo te mira a ti.", "photo": "server room red light"},
+    {"screen": "1. Nadie está a cargo", "say": "Error uno: que todos opinen y nadie decida. Nombra a una persona a cargo del incidente y respeta sus decisiones.", "photo": "crowded control room"},
+    {"screen": "2. Silencio con los clientes", "say": "Error dos: callarte hasta tener todas las respuestas. Avisa pronto, aunque sea poco, y actualiza cada cierto tiempo.", "photo": "phone notification hand"},
+    {"screen": "3. Buscar culpables", "say": "Error tres: buscar al culpable en plena caída. Primero recupera el servicio. Después revisa qué falló en el sistema, no en la persona.", "photo": "engineers laptop night"},
+    {"screen": "La calma también se lidera", "say": "Antes de la próxima caída, define quién manda, cómo avisas y cómo aprendes. Sígueme para más.", "photo": "team planning whiteboard"}
+  ]
+}
