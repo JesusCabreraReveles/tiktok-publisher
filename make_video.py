@@ -188,6 +188,14 @@ PRONUNCIATION = {
         "LinkedIn": "Línkedin", "Anthropic": "Antrópic", "startup": "estártap",
         "startups": "estártaps", "software": "sóftuer", "hardware": "járduer",
         "data center": "data cénter", "cloud": "cláud",
+        # Martes técnico (desde 1 dic 2026)
+        "MCP": "eme ce pe", "Agent2Agent": "éyent tu éyent", "A2A": "a tu a",
+        "DuckDB": "Dac de bé", "OpenGL": "Ópen yi el", "WebGL": "Web yi el",
+        "three.js": "tri yei es", "JavaScript": "Yava escript", "TypeScript": "Taip escript",
+        "Rust": "Rast", "Golang": "Gou lang", "Go": "Gou", "Python": "Páiton",
+        "shader": "chéider", "shaders": "chéiders", "embeddings": "embédings",
+        "pipeline": "páip lain", "framework": "fréimuork", "React": "Riákt",
+        "Lauren Tan": "Lóren Tan", "SpaceX": "Espéis ex", "C++": "ce más más",
     },
 }
 
