@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "IA · MARTES",
+  "brand": "geminislabs.com",
+  "caption": "Sierra reporta más de 400 millones de dólares al año con agentes de IA para soporte. Tres pasos para empezar en tu empresa.",
+  "hashtags": ["#ia", "#atencionalcliente", "#negocios", "#techtok"],
+  "slides": [
+    {"screen": "La IA en soporte ya factura", "say": "Sierra, la empresa de agentes de IA para atención a clientes, reporta más de cuatrocientos millones de dólares en ingresos anuales.", "photo": "call center headset"},
+    {"screen": "Mito: es solo un chatbot", "say": "Realidad: los inversionistas ya la valúan en unos treinta mil millones, el doble que en mayo. El mercado lo ve como negocio serio.", "photo": "business people handshake"},
+    {"screen": "1. Empieza por preguntas repetidas", "say": "Revisa los tickets del último mes. Las diez preguntas más comunes son tu primer proyecto.", "photo": "sticky notes wall"},
+    {"screen": "2. Conéctalo a tus sistemas", "say": "Un agente que no ve pedidos ni facturas solo da respuestas genéricas. Dale primero acceso de solo lectura.", "photo": "warehouse packages shelves"},
+    {"screen": "3. Mide casos resueltos", "say": "Cuenta cuántos casos se cierran sin pasar a una persona, y deja siempre la salida a un humano. Sígueme para más.", "photo": "customer service woman smiling"}
+  ]
+}
