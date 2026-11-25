@@ -1,0 +1,15 @@
+{
+  "lang": "es",
+  "tag": "ARQUITECTURA · MIÉRCOLES",
+  "brand": "geminislabs.com",
+  "caption": "Mito vs realidad: casi ningún equipo pequeño necesita microservicios. Tres pasos para un monolito modular que sí crece.",
+  "hashtags": ["#tecnologia", "#programacion", "#arquitecturadesoftware", "#techtok"],
+  "slides": [
+    {"screen": "No necesitas microservicios todavía", "say": "La mayoría de los equipos pequeños no necesita microservicios. Necesita un monolito bien ordenado.", "photo": "messy cables server"},
+    {"screen": "Mito: más servicios, más velocidad", "say": "Mito: los microservicios hacen tu sistema más rápido. Realidad: agregas red, latencia y más formas de fallar.", "photo": "tangled network cables"},
+    {"screen": "1. Divide por módulos, no servidores", "say": "Separa tu código en módulos con fronteras claras dentro de una sola aplicación. Cada módulo es dueño de sus datos.", "photo": "organized toolbox drawers"},
+    {"screen": "2. Nada de atajos entre módulos", "say": "Un módulo solo habla con otro por su interfaz pública. Nunca leyendo directo sus tablas.", "photo": "closed office doors hallway"},
+    {"screen": "3. Extrae cuando duela de verdad", "say": "Saca un módulo a su propio servicio cuando haya una razón real: escalar distinto o un equipo independiente.", "photo": "cargo containers port"},
+    {"screen": "Primero orden, luego distribución", "say": "Si no puedes ordenar un monolito, tampoco vas a ordenar veinte servicios. Sígueme para más.", "photo": "engineer whiteboard planning"}
+  ]
+}

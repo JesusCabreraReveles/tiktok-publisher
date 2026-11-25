@@ -1,0 +1,15 @@
+{
+  "lang": "es",
+  "tag": "LIBRO · MIÉRCOLES",
+  "brand": "geminislabs.com",
+  "cover": "portadas/B0HGNKZKYH.jpg",
+  "caption": "Mi libro ADR Kit for Distributed Architectures está en Amazon (en inglés). Búscalo como \"Jesús Cabrera Reveles\".",
+  "hashtags": ["#booktok", "#libros", "#programacion", "#techtok"],
+  "slides": [
+    {"screen": "¿Por qué decidimos esto?", "say": "¿Alguna vez heredaste un sistema y nadie supo explicarte por qué se tomó una decisión de arquitectura?"},
+    {"screen": "Escribí un libro sobre esto", "say": "Escribí un libro sobre cómo registrar las decisiones de arquitectura en sistemas distribuidos. Está en inglés."},
+    {"screen": "Registra, revisa, revisita", "say": "Te ayuda a documentar cada decisión, revisarla con tu equipo y volver a ella cuando el contexto cambia."},
+    {"screen": "Para arquitectos y líderes técnicos", "say": "Es para arquitectos, líderes técnicos y equipos que construyen sistemas distribuidos y quieren dejar de repetir discusiones."},
+    {"screen": "Está en Amazon", "say": "Está en Amazon, en inglés. Búscalo con mi nombre completo: Jesús Cabrera Reveles. Sígueme para más."}
+  ]
+}
