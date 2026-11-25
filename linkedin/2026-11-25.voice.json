@@ -1,0 +1,8 @@
+{
+  "voice": "am_michael",
+  "segments": [
+    {"at": 0.4, "say": "A disaster recovery test reached across and hit the production database."},
+    {"at": 6.8, "say": "The fix: fence the recovery site off."},
+    {"at": 10.8, "say": "Isolate recovery first. Then test it."}
+  ]
+}

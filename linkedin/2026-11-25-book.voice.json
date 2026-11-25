@@ -1,0 +1,8 @@
+{
+  "voice": "am_michael",
+  "segments": [
+    {"at": 0.5, "say": "Nobody remembers why your system was built this way."},
+    {"at": 5.4, "say": "My book: recording, reviewing, and revisiting decisions."},
+    {"at": 9.9, "say": "It's on Amazon. Search Jesús Cabrera Reveles."}
+  ]
+}

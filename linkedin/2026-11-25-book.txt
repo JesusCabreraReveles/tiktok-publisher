@@ -1,0 +1,22 @@
+Most architecture decisions in distributed systems outlive the context that justified them. The people move on, the load changes, and a year later nobody can say why the system works the way it does, or whether the original reasons still hold.
+
+I wrote "ADR Kit for Distributed Architectures: A Field Playbook for Recording, Reviewing, and Revisiting System Decisions" for the engineers and architects who have to live with those decisions.
+
+It follows a decision through three stages:
+→ Recording it while the context is fresh
+→ Reviewing it before it ships
+→ Revisiting it when the system changes
+
+It's a field playbook written by a practitioner, aimed at real systems rather than whiteboard designs.
+
+Paperback: https://www.amazon.com.mx/dp/B0HGNKZKYH
+Ebook: https://www.amazon.com.mx/dp/B0HGMSQ4Y5
+
+Which decision in your system would you most like to find the original reasoning for?
+
+#SoftwareArchitecture #ADR #DistributedSystems #TechLeadership #SystemDesign
+
+—
+Geminislabs: https://geminislabs.com/
+Clash of Egos: https://clashofegos.lol/
+My book: https://www.amazon.com.mx/dp/B0HGNKZKYH

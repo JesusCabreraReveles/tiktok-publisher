@@ -1,0 +1,22 @@
+A disaster recovery test should never be able to touch production. This month, one did.
+
+Per the Cloud Security Alliance's write-up of the mid-November outage cluster, Workday customer tenants were disrupted after, during a DR maintenance check, "tenanted services within the DR Site unexpectedly connected to Production databases." Root causes in that note are still described as preliminary, so I won't speculate on Workday's internals.
+
+But the failure mode is common. DR sites are often built as copies of production: same configs, same service names, same connection strings. Then a test brings the copy to life, and it reaches for the only database it knows.
+
+What I want in place before anyone runs a DR drill:
+→ Environment identity in every credential, so a DR service can't authenticate against prod.
+→ Network rules that deny DR-to-prod traffic by default. Replication flows one way.
+→ Connection targets resolved per site, never copied from production config.
+→ A drill checklist step that proves the fence holds before failover starts.
+
+A recovery plan you can't test safely is a second way to cause the outage.
+
+When did your team last check what your DR environment can actually reach?
+
+#SoftwareArchitecture #DisasterRecovery #SRE #Resilience #DistributedSystems
+
+—
+Geminislabs: https://geminislabs.com/
+Clash of Egos: https://clashofegos.lol/
+My book: https://www.amazon.com.mx/dp/B0HFTBY42R
