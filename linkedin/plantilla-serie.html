@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<meta name="format" content="gif">
+<meta name="duration" content="3">
+<meta name="size" content="1080x1350">
+<title>PLANTILLA serie semanal (aprobada por Jesús el 26 nov 2026): ejemplo 4 Rate Limiting Algorithms</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1080px;height:1350px;background:#fbfaf7;font-family:Inter,sans-serif;color:#111827;position:relative;overflow:hidden}
+.tag{position:absolute;left:40px;top:30px;font-size:20px;font-weight:800;letter-spacing:3px;color:#ea580c}
+h1{position:absolute;left:0;right:0;top:62px;text-align:center;font-size:60px;font-weight:900;letter-spacing:-1.5px}
+h1 .hl{background:#2563eb;color:#fff;padding:0 14px;border-radius:6px}
+.chip{position:absolute;left:50%;transform:translateX(-50%);top:150px;display:flex;align-items:center;gap:10px;background:#1e3a8a;color:#fff;border-radius:30px;padding:5px 18px 5px 5px}
+.chip img{width:40px;height:40px;border-radius:50%;object-fit:cover;object-position:50% 12%;background:#dbeafe}
+.chip b{font-size:18px;display:block;line-height:1.1}
+.chip span{font-size:14px;color:#bfdbfe}
+.row{position:absolute;left:40px;width:1000px;height:252px;border:2px solid #e5e7eb;border-radius:16px;background:#fff}
+.left{position:absolute;left:0;top:0;bottom:0;width:230px;border-radius:14px 0 0 14px;padding:16px 18px}
+.num{font-size:30px;font-weight:900;color:rgba(17,24,39,.35)}
+.ico{position:absolute;right:16px;top:14px;width:64px;height:64px}
+.name{margin-top:52px;font-size:28px;font-weight:900;line-height:1.05}
+.desc{margin-top:8px;font-size:18px;line-height:1.25;color:#374151}
+.right{position:absolute;right:0;top:0;bottom:0;width:270px;border-left:2px dashed #e5e7eb;padding:16px 18px;background:#f6fbf7;border-radius:0 14px 14px 0}
+.best{font-size:20px;font-weight:800}
+.pill{display:inline-block;margin-top:8px;background:#111827;color:#fff;font-size:19px;font-weight:800;padding:5px 14px;border-radius:8px}
+.formula{margin-top:10px;font-family:"DejaVu Sans Mono",monospace;font-size:17px;border:2px solid #d1d5db;background:#fff;border-radius:8px;padding:6px 8px;text-align:center}
+.note{margin-top:9px;font-size:17px;line-height:1.25;color:#374151}
+svg.d{position:absolute;left:240px;top:0;width:480px;height:248px;overflow:visible}
+svg text{font-family:Inter,sans-serif}
+.lbl{font-size:18px;font-weight:700;fill:#111827}
+.sm{font-size:16px;font-weight:600;fill:#4b5563}
+.mono{font-family:"DejaVu Sans Mono",monospace;font-size:16px;fill:#111827}
+.box{fill:#fff;stroke:#111827;stroke-width:2.5}
+.flow{fill:none;stroke:#9ca3af;stroke-width:2.5;stroke-dasharray:7 7;animation:dash 3s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-42}}
+.dot{offset-rotate:0deg;animation:move 3s linear infinite}
+@keyframes move{0%{offset-distance:0%}100%{offset-distance:100%}}
+.blink{animation:blink 3s steps(1) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.25}}
+.foot{position:absolute;left:40px;right:40px;bottom:26px;display:flex;justify-content:space-between;font-size:18px;color:#6b7280;font-weight:600}
+</style></head><body>
+<div class="tag">SERIES · RATE LIMITING · 1/2</div>
+<h1>4 <span class="hl">Rate Limiting</span> Algorithms</h1>
+<div class="chip"><img src="../avatar/panda_saluda.png" alt=""><div><b>Jesús Cabrera</b><span>geminislabs.com</span></div></div>
+
+<!-- 01 TOKEN BUCKET -->
+<div class="row" style="top:215px">
+  <div class="left" style="background:#dff6f8">
+    <div class="num">01</div>
+    <svg class="ico" viewBox="0 0 64 64"><path d="M12 18h40l-5 38H17z" fill="#fff" stroke="#0e7490" stroke-width="3"/><ellipse cx="32" cy="18" rx="20" ry="5" fill="#a5f3fc" stroke="#0e7490" stroke-width="3"/><circle cx="25" cy="36" r="5" fill="#f59e0b"/><circle cx="38" cy="40" r="5" fill="#f59e0b"/><circle cx="31" cy="48" r="5" fill="#f59e0b"/></svg>
+    <div class="name">Token<br>Bucket</div>
+    <div class="desc">Tokens refill at a fixed rate. Each request spends one.</div>
+  </div>
+  <svg class="d" viewBox="0 0 480 248">
+    <text class="sm" x="150" y="30">refill: r tokens/s</text>
+    <path class="flow" d="M200 40 V78"/>
+    <circle r="6" fill="#f59e0b" class="dot" style="offset-path:path('M200 40 V78')"/>
+    <path d="M150 82h100l-10 80h-80z" class="box"/>
+    <circle cx="180" cy="120" r="9" fill="#f59e0b"/><circle cx="202" cy="138" r="9" fill="#f59e0b"/><circle cx="222" cy="118" r="9" fill="#f59e0b"/>
+    <text class="sm" x="152" y="185">capacity b</text>
+    <text class="lbl" x="10" y="216">requests</text>
+    <path class="flow" d="M40 196 C 80 196, 110 175, 150 150"/>
+    <circle r="7" fill="#2563eb" class="dot" style="offset-path:path('M40 196 C 80 196, 110 175, 150 150')"/>
+    <circle r="7" fill="#2563eb" class="dot" style="offset-path:path('M40 196 C 80 196, 110 175, 150 150');animation-delay:-1.5s"/>
+    <path class="flow" d="M245 122 H350"/>
+    <circle r="7" fill="#16a34a" class="dot" style="offset-path:path('M245 122 H350')"/>
+    <rect x="352" y="100" width="110" height="44" rx="8" class="box"/><text class="mono" x="370" y="128">200 OK</text>
+    <path class="flow" d="M245 150 C 300 170, 320 200, 350 205"/>
+    <rect x="352" y="186" width="110" height="40" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5"/><text class="mono" x="364" y="212" fill="#b91c1c">429 empty</text>
+  </svg>
+  <div class="right"><div class="best">Best for:</div><div class="pill">Bursty APIs</div><div class="formula">allow if tokens ≥ 1</div><div class="note">Allows bursts up to the bucket size, then the refill rate.</div></div>
+</div>
+
+<!-- 02 LEAKY BUCKET -->
+<div class="row" style="top:483px">
+  <div class="left" style="background:#fde7ea">
+    <div class="num">02</div>
+    <svg class="ico" viewBox="0 0 64 64"><path d="M10 12h44L36 36v14l-8 6V36z" fill="#fff" stroke="#be123c" stroke-width="3"/><circle cx="32" cy="61" r="3" fill="#be123c"/></svg>
+    <div class="name">Leaky<br>Bucket</div>
+    <div class="desc">Requests queue up and drain at a constant rate.</div>
+  </div>
+  <svg class="d" viewBox="0 0 480 248">
+    <text class="lbl" x="10" y="40">spiky input</text>
+    <path class="flow" d="M30 60 C 60 60, 80 110, 120 120"/>
+    <path class="flow" d="M30 180 C 60 180, 80 130, 120 128"/>
+    <circle r="7" fill="#2563eb" class="dot" style="offset-path:path('M30 60 C 60 60, 80 110, 120 120')"/>
+    <circle r="7" fill="#2563eb" class="dot" style="offset-path:path('M30 180 C 60 180, 80 130, 120 128');animation-delay:-.6s"/>
+    <circle r="7" fill="#2563eb" class="dot" style="offset-path:path('M30 60 C 60 60, 80 110, 120 120');animation-delay:-1.2s"/>
+    <rect x="122" y="96" width="150" height="58" rx="8" class="box"/>
+    <rect x="134" y="108" width="28" height="34" rx="4" fill="#bfdbfe"/><rect x="168" y="108" width="28" height="34" rx="4" fill="#bfdbfe"/><rect x="202" y="108" width="28" height="34" rx="4" fill="#bfdbfe"/><rect x="236" y="108" width="28" height="34" rx="4" fill="#e5e7eb"/>
+    <text class="sm" x="150" y="180">FIFO queue</text>
+    <path class="flow" d="M272 125 H352"/>
+    <circle r="7" fill="#16a34a" class="dot" style="offset-path:path('M272 125 H352')"/>
+    <text class="sm" x="276" y="105">fixed r/s</text>
+    <rect x="354" y="100" width="108" height="50" rx="8" class="box"/><text class="lbl" x="376" y="131">server</text>
+    <text class="sm" x="262" y="226">queue full → drop</text>
+  </svg>
+  <div class="right"><div class="best">Best for:</div><div class="pill">Smooth output</div><div class="formula">out rate = r (fixed)</div><div class="note">Absorbs spikes by queueing them. nginx limit_req works this way.</div></div>
+</div>
+
+<!-- 03 FIXED WINDOW -->
+<div class="row" style="top:751px">
+  <div class="left" style="background:#ece7fa">
+    <div class="num">03</div>
+    <svg class="ico" viewBox="0 0 64 64"><rect x="8" y="12" width="48" height="44" rx="6" fill="#fff" stroke="#6d28d9" stroke-width="3"/><path d="M8 24h48" stroke="#6d28d9" stroke-width="3"/><rect x="16" y="30" width="10" height="8" fill="#c4b5fd"/><rect x="30" y="30" width="10" height="8" fill="#c4b5fd"/><rect x="16" y="42" width="10" height="8" fill="#c4b5fd"/></svg>
+    <div class="name">Fixed<br>Window</div>
+    <div class="desc">Count requests per clock window. Reset at the edge.</div>
+  </div>
+  <svg class="d" viewBox="0 0 480 248">
+    <rect x="20" y="70" width="210" height="110" rx="8" fill="#f5f3ff" stroke="#6d28d9" stroke-width="2.5"/>
+    <rect x="240" y="70" width="210" height="110" rx="8" fill="#f5f3ff" stroke="#6d28d9" stroke-width="2.5"/>
+    <text class="sm" x="70" y="58">00:00 – 00:59</text><text class="sm" x="290" y="58">01:00 – 01:59</text>
+    <text class="mono" x="80" y="160">count ≤ N</text><text class="mono" x="300" y="160">count ≤ N</text>
+    <path class="flow" d="M150 110 H330"/>
+    <circle r="7" fill="#dc2626" class="dot" style="offset-path:path('M150 110 H330')"/>
+    <circle r="7" fill="#dc2626" class="dot" style="offset-path:path('M150 110 H330');animation-delay:-1s"/>
+    <circle r="7" fill="#dc2626" class="dot" style="offset-path:path('M150 110 H330');animation-delay:-2s"/>
+    <line x1="235" y1="62" x2="235" y2="190" stroke="#dc2626" stroke-width="3" class="blink"/>
+    <text class="lbl" x="120" y="222" fill="#b91c1c">N at :59 + N at 1:00 = 2N</text>
+  </svg>
+  <div class="right"><div class="best">Best for:</div><div class="pill">Simple quotas</div><div class="formula">count[minute] ≤ N</div><div class="note">One counter per key. Weak spot: bursts at the window edge.</div></div>
+</div>
+
+<!-- 04 SLIDING WINDOW -->
+<div class="row" style="top:1019px">
+  <div class="left" style="background:#e3f5e8">
+    <div class="num">04</div>
+    <svg class="ico" viewBox="0 0 64 64"><rect x="6" y="22" width="52" height="20" rx="4" fill="#fff" stroke="#15803d" stroke-width="3"/><rect x="20" y="16" width="26" height="32" rx="4" fill="none" stroke="#f59e0b" stroke-width="4"/></svg>
+    <div class="name">Sliding<br>Window</div>
+    <div class="desc">Weight the previous window to smooth the edge.</div>
+  </div>
+  <svg class="d" viewBox="0 0 480 248">
+    <rect x="20" y="96" width="210" height="40" rx="8" fill="#f0fdf4" stroke="#15803d" stroke-width="2.5"/>
+    <rect x="240" y="96" width="210" height="40" rx="8" fill="#f0fdf4" stroke="#15803d" stroke-width="2.5"/>
+    <rect x="34" y="106" width="150" height="20" rx="4" fill="#86efac"/><rect x="254" y="106" width="60" height="20" rx="4" fill="#86efac"/>
+    <text class="sm" x="85" y="170">prev = 80</text><text class="sm" x="305" y="170">curr = 30</text>
+    <g style="animation:slide 3s ease-in-out infinite">
+      <rect x="120" y="84" width="220" height="64" rx="10" fill="none" stroke="#f59e0b" stroke-width="5"/>
+      <text class="lbl" x="190" y="72" fill="#b45309">last 60 s</text>
+    </g>
+    <text class="mono" x="40" y="210">80 × 0.25 + 30 = 50 ≤ N</text>
+    <text class="sm" x="40" y="236">25% of the previous window still overlaps</text>
+  </svg>
+  <div class="right"><div class="best">Best for:</div><div class="pill">Accurate limits</div><div class="formula">prev × overlap + curr ≤ N</div><div class="note">Close to exact with only two counters per key.</div></div>
+</div>
+<style>@keyframes slide{0%,100%{transform:translateX(-20px)}50%{transform:translateX(20px)}}</style>
+
+<div class="foot"><span>geminislabs.com</span><span>Part 2 on Thursday: limits across many servers</span></div>
+</body></html>
