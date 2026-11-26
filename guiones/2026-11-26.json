@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "FOUNDERS · JUEVES",
+  "brand": "geminislabs.com",
+  "caption": "Cobrar barato no te consigue clientes. Tres mitos sobre ponerle precio a tu producto cuando estás empezando.",
+  "hashtags": ["#tecnologia", "#emprendimiento", "#startups", "#techtok"],
+  "slides": [
+    {"screen": "Cobrar barato te está frenando", "say": "Si estás empezando, lo más probable es que cobres muy poco. Y eso te está frenando más de lo que crees.", "photo": "price tags market"},
+    {"screen": "Mito 1: barato vende más", "say": "Mito: si es barato, vendes más. Realidad: atraes clientes que solo buscan descuento y se van con el siguiente.", "photo": "shopping cart supermarket"},
+    {"screen": "Mito 2: sube el precio después", "say": "Mito: luego subes el precio. Realidad: subirlo cuesta mucho más que empezar bien. Tus clientes se acostumbran rápido.", "photo": "calculator receipts desk"},
+    {"screen": "Mito 3: el precio es solo números", "say": "Mito: el precio es pura cuenta. Realidad: también es un mensaje. Un precio muy bajo hace dudar de tu calidad.", "photo": "store owner counter"},
+    {"screen": "Cobra por el problema que resuelves", "say": "Cobra por el problema que le resuelves al cliente, no por tus horas. Y pregunta antes de construir. Sígueme para más.", "photo": "business meeting coffee"}
+  ]
+}
