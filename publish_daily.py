@@ -20,6 +20,13 @@ linkedin/YYYY-MM-DD[-name].voice.json read in English by Kokoro, over soft gener
 music. Without a .voice.json, or if the voice fails, it still gets the music: never silent. If
 even the music step fails, the silent video goes out (logged as a warning) rather than holding it.
 
+Weekly series in GIF (26 nov 2026): a LinkedIn diagram whose HTML has
+<meta name="format" content="gif"> becomes docs/videos/li-<name>-<hash>.gif (looping, no sound,
+under 5 MB so LinkedIn animates it) and goes ONLY to "make_webhook_linkedin_url", with
+"media_type": "gif" and "image_url" instead of "video_url". That scenario creates the draft in the
+LinkedIn IA category. Without that webhook the GIF post is held (the TikTok scenario only takes
+videos). Any .voice.json next to it is ignored.
+
 Usage:
   python3 publish_daily.py                 # today's scripts
   python3 publish_daily.py --date 2026-10-21
@@ -51,7 +58,7 @@ Needs in config.json:
 Optional:
   "tiktok_privacy":   "PUBLIC_TO_EVERYONE"   (sent to Make as "privacy")
   "make_webhook_linkedin_url": "https://hook.us1.make.com/..."   (LinkedIn videos; default:
-                                the TikTok webhook)
+                                the TikTok webhook. Required for GIF posts.)
 """
 import argparse
 import datetime as dt
@@ -152,6 +159,11 @@ def find_linkedin(date):
     return found
 
 
+def wants_gif(html):
+    """True if the diagram asks to be published as an animated GIF (weekly series)."""
+    return re.search(r'<meta\s+name="format"\s+content="gif"', html, re.I) is not None
+
+
 def missing_images(html):
     """Local images (e.g. ../portadas/X.jpg) that the diagram uses but are not in the repo."""
     base = os.path.join(HERE, "linkedin")
@@ -176,7 +188,8 @@ def main():
         cfg = json.load(f)
     base = cfg.get("pages_base_url", "").rstrip("/") + "/"
     hook = cfg.get("make_webhook_url", "")
-    li_hook = cfg.get("make_webhook_linkedin_url") or hook
+    li_only_hook = cfg.get("make_webhook_linkedin_url", "")
+    li_hook = li_only_hook or hook
     if not args.dry_run and (not hook or not base.startswith("http")):
         sys.exit("config.json needs make_webhook_url and pages_base_url")
 
@@ -230,6 +243,43 @@ def main():
             raw_html = f.read()
         with open(txt_path, "rb") as f:
             raw_txt = f.read()
+        if wants_gif(raw_html.decode("utf-8", errors="replace")):
+            if not li_only_hook and not args.dry_run:
+                log(f"ERROR: linkedin/{stem} is a GIF post but config.json has no "
+                    f"make_webhook_linkedin_url (the TikTok scenario only takes videos). Held.")
+                held.append(f"linkedin/{stem}")
+                continue
+            lost = missing_images(raw_html.decode("utf-8", errors="replace"))
+            if lost and not args.allow_missing_cover:
+                log(f"ERROR: linkedin/{stem} uses images that are not in the repo: "
+                    f"{', '.join(lost)}. Held.")
+                held.append(f"linkedin/{stem}")
+                continue
+            text = raw_txt.decode("utf-8").strip()
+            if not text:
+                log(f"ERROR: linkedin/{stem}.txt is empty. Held.")
+                held.append(f"linkedin/{stem}")
+                continue
+            name = f"li-{stem}-{hashlib.sha1(raw_html + raw_txt + b'gif-v1').hexdigest()[:8]}"
+            rel_video = f"docs/videos/{name}.gif"
+            gif = os.path.join(HERE, rel_video)
+            os.makedirs(os.path.dirname(gif), exist_ok=True)
+            if os.path.exists(gif) and not args.force:
+                log(f"GIF already exists, reusing it: {rel_video}")
+            else:
+                try:
+                    render([PY, "render_diagram.py", html_path, "-o", gif], cfg)
+                except subprocess.CalledProcessError as e:
+                    log(f"ERROR rendering linkedin/{stem} as GIF: {e}. Held.")
+                    if os.path.exists(gif):
+                        os.remove(gif)
+                    held.append(f"linkedin/{stem}")
+                    continue
+            if os.path.getsize(gif) > 5_000_000:
+                log(f"WARNING: {rel_video} is over 5 MB: LinkedIn may show it without animation.")
+            jobs.append({"kind": "linkedin-gif", "text": text, "name": name,
+                         "rel_video": rel_video})
+            continue
         voice_path = os.path.splitext(html_path)[0] + ".voice.json"
         raw_voice = b""
         if os.path.isfile(voice_path):
@@ -283,7 +333,7 @@ def main():
 
     if args.dry_run:
         for j in jobs:
-            text = j["text"] if j["kind"] == "linkedin" else build_caption(j["sc"])
+            text = j["text"] if j["kind"].startswith("linkedin") else build_caption(j["sc"])
             log(f"Dry run ({j['kind']}): {j['rel_video']}\nCaption:\n{text}")
         if held:
             log(f"HELD: {', '.join(held)}")
@@ -316,7 +366,17 @@ def main():
             log("ERROR: the video never went live on GitHub Pages. Check the Pages build.")
             failures += 1
             continue
-        if j["kind"] == "linkedin":
+        if j["kind"] == "linkedin-gif":
+            target = li_only_hook
+            payload = {
+                "date": args.date,
+                "caption": j["text"][:3000],
+                "image_url": url,
+                "media_type": "gif",
+                "lang": "en",
+                "platform": "linkedin",
+            }
+        elif j["kind"] == "linkedin":
             target = li_hook
             payload = {
                 "date": args.date,

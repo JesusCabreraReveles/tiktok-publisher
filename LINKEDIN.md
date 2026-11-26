@@ -101,3 +101,21 @@ La corrida termina con error para que el reintento lo vuelva a intentar. Nada se
 ```bash
 python3 publish_daily.py --dry-run     # genera los videos sin subir ni mandar nada
 ```
+
+## Serie semanal en GIF (desde el 26 nov 2026)
+Un tema por semana (arquitectura, protocolos, seguridad, procesos de IA), 2 posts del mismo tema,
+martes y jueves. Cada post es un diagrama animado en **GIF** (sin sonido) + texto claro, con hashtags
+del tema y **sin links**.
+
+- Archivos: `linkedin/AAAA-MM-DD-serie.html` + `linkedin/AAAA-MM-DD-serie.txt`. El HTML lleva
+  `<meta name="format" content="gif">`; sin esa línea se publicaría como video.
+- La Pi lo convierte en `docs/videos/li-<nombre>-<hash>.gif` con `render_diagram.py -o x.gif`:
+  1080×1350 a 15 cuadros por segundo; si pasa de 4.5 MB prueba versiones más chicas. LinkedIn solo
+  anima un GIF de menos de 5 MB y 400 cuadros (si no, muestra el primer cuadro).
+- Se manda **solo** a `make_webhook_linkedin_url` (escenario de LinkedIn, categoría LinkedIn IA) con:
+  `{"date", "caption", "image_url", "media_type": "gif", "lang": "en", "platform": "linkedin"}`.
+  Si en ese escenario también llegan los videos (cuando `make_webhook_linkedin_url` está puesto),
+  hay que separar por `media_type` (gif → imagen; sin `media_type` → video).
+  Sin ese webhook el post queda detenido: el escenario de TikTok solo acepta videos.
+- Un `.voice.json` junto al GIF se ignora.
+- Probar a mano: `python3 render_diagram.py linkedin/2026-11-25.html -o prueba.gif` (~0.8 MB).

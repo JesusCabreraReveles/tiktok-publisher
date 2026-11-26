@@ -10,6 +10,7 @@ is always smooth, even if the Pi is slow.
 
 Usage:
   python3 render_diagram.py linkedin/2026-11-11.html -o out.mp4
+  python3 render_diagram.py linkedin/2026-12-01-serie.html -o out.gif   # animated GIF
   python3 render_diagram.py linkedin/2026-11-11.html --still preview.png --at 9
   python3 render_diagram.py page.html -o out.mp4 --fps 30 --duration 15
 
@@ -22,6 +23,12 @@ Rules for the HTML:
   - Animate with CSS animations/transitions or SVG <animate> (SMIL). No JavaScript timers:
     they are not paused, so they would not match the frames.
 
+GIF (26 nov 2026, weekly series): with -o something.gif it writes a looping animated GIF
+with no sound. LinkedIn only animates a GIF under 5 MB and 400 frames (otherwise it shows the
+first frame), so it tries smaller versions until one fits under --max-mb (default 4.5):
+15 fps at full size (1080 px), then 12 fps, then 810, 720 and 640 px wide. If none fits, it keeps
+the smallest one and warns.
+
 Chromium: uses the one installed by Playwright ("playwright install chromium"). If that
 fails (for example on Raspberry Pi OS), it falls back to the system one
 (sudo apt install chromium), or to the path given with --chromium.
@@ -32,6 +39,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 
 from playwright.sync_api import sync_playwright
@@ -70,10 +78,47 @@ def launch(p, chromium_path):
              f"'sudo apt install chromium'.\nLast error: {last}")
 
 
+GIF_STEPS = [(15, 1080), (12, 1080), (12, 810), (10, 720), (8, 640)]   # (fps, width), best first
+GIF_MAX_FRAMES = 400   # LinkedIn freezes GIFs with more frames
+
+
+def encode_gif(frame_dir, capture_fps, out, fps, width):
+    """PNG frames -> looping GIF with one palette for the whole clip (flat diagram colors
+    compress well; 'diff' stats keep the palette for what actually moves)."""
+    vf = (f"fps={fps},scale={width}:-2:flags=lanczos,split[a][b];"
+          f"[a]palettegen=max_colors=128:stats_mode=diff[p];"
+          f"[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle")
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(capture_fps),
+                    "-i", os.path.join(frame_dir, "%05d.png"), "-vf", vf, "-loop", "0", out],
+                   check=True)
+    return os.path.getsize(out) / 1e6
+
+
+def write_gif(page, frames, capture_fps, out, max_mb):
+    with tempfile.TemporaryDirectory() as tmp:
+        for i in range(frames):
+            page.evaluate(SEEK_JS, i / capture_fps)
+            page.screenshot(path=os.path.join(tmp, f"{i:05d}.png"))
+            if i % (capture_fps * 3) == 0:
+                print(f"  frame {i}/{frames}", flush=True)
+        duration = frames / capture_fps
+        mb = 0
+        for fps, width in GIF_STEPS:
+            if duration * fps > GIF_MAX_FRAMES:
+                continue
+            mb = encode_gif(tmp, capture_fps, out, fps, width)
+            print(f"  gif {fps} fps, {width} px: {mb:.2f} MB", flush=True)
+            if mb <= max_mb:
+                return fps, width, mb
+        print(f"WARNING: the GIF is {mb:.2f} MB (over {max_mb} MB): LinkedIn may not animate it. "
+              f"Make the diagram shorter or with fewer moving parts.", flush=True)
+        return fps, width, mb
+
+
 def main():
-    ap = argparse.ArgumentParser(description="Animated HTML diagram -> MP4")
+    ap = argparse.ArgumentParser(description="Animated HTML diagram -> MP4 or GIF")
     ap.add_argument("html")
-    ap.add_argument("-o", "--output", help="MP4 file to write")
+    ap.add_argument("-o", "--output", help="MP4 (or .gif) file to write")
     ap.add_argument("--still", help="write a single PNG instead of a video")
     ap.add_argument("--at", type=float, default=None, help="second for --still (default: last)")
     ap.add_argument("--fps", type=int, default=30)
@@ -81,6 +126,7 @@ def main():
     ap.add_argument("--size", default=None, help="WIDTHxHEIGHT, e.g. 1080x1350")
     ap.add_argument("--crf", type=int, default=20)
     ap.add_argument("--chromium", default=None, help="path to a Chromium binary")
+    ap.add_argument("--max-mb", type=float, default=4.5, help="GIF size limit (LinkedIn: 5 MB)")
     args = ap.parse_args()
 
     if not args.output and not args.still:
@@ -93,6 +139,9 @@ def main():
         html = f.read()
     duration = args.duration or float(meta(html, "duration") or 12)
     w, h = (int(x) for x in (args.size or meta(html, "size") or "1080x1350").split("x"))
+    is_gif = bool(args.output) and args.output.lower().endswith(".gif")
+    if is_gif:
+        args.fps = GIF_STEPS[0][0]   # capture at the best GIF rate; ffmpeg drops frames below it
     frames = int(round(duration * args.fps))
 
     with sync_playwright() as p:
@@ -112,6 +161,15 @@ def main():
 
         out = os.path.abspath(args.output)
         os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+        if is_gif:
+            start = time.time()
+            try:
+                fps, width, mb = write_gif(page, frames, args.fps, out, args.max_mb)
+            finally:
+                browser.close()
+            print(f"Done: {out} (GIF, {duration:.1f}s, {fps} fps, {width} px wide, {mb:.2f} MB, "
+                  f"{time.time() - start:.0f}s to render)")
+            return
         ff = subprocess.Popen(
             ["ffmpeg", "-y", "-loglevel", "error",
              "-f", "image2pipe", "-framerate", str(args.fps), "-c:v", "png", "-i", "-",
