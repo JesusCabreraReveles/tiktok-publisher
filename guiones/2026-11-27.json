@@ -1,0 +1,14 @@
+{
+  "lang": "es",
+  "tag": "TENDENCIAS · VIERNES",
+  "brand": "geminislabs.com",
+  "caption": "La carrera de la IA ya es de costo: Rust en APIs, satélites con cómputo y modelos abiertos. Mide tu costo por solicitud.",
+  "hashtags": ["#ia", "#tecnologia", "#programacion", "#techtok"],
+  "slides": [
+    {"screen": "La IA ya choca con su costo", "say": "La carrera de la IA ya no es solo de modelos: es de costo de cómputo. Tres señales.", "photo": "data center servers"},
+    {"screen": "1. Anthropic reescribió su API", "say": "Anthropic pasó su API de Python a Rust usando agentes de Claude, con revisión humana. Reporta cerca de setenta por ciento menos procesador por solicitud.", "photo": "computer code screen"},
+    {"screen": "2. Centros de datos en órbita", "say": "Según reportes, Estados Unidos autorizó a SpaceX hasta un millón de satélites para procesar IA en el espacio. Hay dudas sobre su enfriamiento.", "photo": "satellite orbit earth"},
+    {"screen": "3. Modelos abiertos para tu negocio", "say": "Ant Group liberó Ling, un modelo que entiende texto, imágenes y video, con licencia abierta: puedes descargarlo y usarlo en tu negocio.", "photo": "laptop team office"},
+    {"screen": "Mide tu costo por solicitud", "say": "Antes de cambiar de modelo, mide cuánto te cuesta cada solicitud. Ahí está tu margen. Sígueme para más.", "photo": "calculator finance desk"}
+  ]
+}
